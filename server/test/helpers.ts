@@ -45,3 +45,21 @@ export async function makeUser(opts: MakeUserOpts = {}): Promise<User> {
     },
   });
 }
+
+import request from 'supertest';
+import type { Express } from 'express';
+import { createApp } from '../src/app';
+
+let sharedApp: Express | null = null;
+export function app(): Express {
+  sharedApp ??= createApp();
+  return sharedApp;
+}
+
+/** A supertest agent logged in as the given user (cookie kept between calls). */
+export async function agentFor(user: User): Promise<ReturnType<typeof request.agent>> {
+  const agent = request.agent(app());
+  const res = await agent.post('/api/auth/login').send({ loginId: user.loginId, password: TEST_PASSWORD });
+  if (res.status !== 200) throw new Error(`login failed for ${user.loginId}: ${res.status} ${JSON.stringify(res.body)}`);
+  return agent;
+}
