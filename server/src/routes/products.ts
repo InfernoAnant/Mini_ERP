@@ -14,8 +14,8 @@ router.get('/', async (req, res) => {
   res.json(serialize(await products.listProducts(currentUser(req), q)));
 });
 
-router.get('/options', async (_req, res) => {
-  res.json(serialize(await products.productOptions()));
+router.get('/options', async (req, res) => {
+  res.json(serialize(await products.productOptions(currentUser(req))));
 });
 
 router.post('/', async (req, res) => {

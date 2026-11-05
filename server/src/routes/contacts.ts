@@ -8,7 +8,7 @@ contactsRouter.use(requireAuth);
 
 contactsRouter.get('/', async (req, res) => {
   const type = z.enum(['CUSTOMER', 'VENDOR']).optional().parse(req.query.type);
-  res.json(await listContacts(type));
+  res.json(await listContacts(currentUser(req), type));
 });
 
 contactsRouter.post('/', async (req, res) => {
@@ -17,6 +17,6 @@ contactsRouter.post('/', async (req, res) => {
 
 export const workCentersRouter = Router();
 workCentersRouter.use(requireAuth);
-workCentersRouter.get('/', async (_req, res) => {
-  res.json(await listWorkCenters());
+workCentersRouter.get('/', async (req, res) => {
+  res.json(await listWorkCenters(currentUser(req)));
 });

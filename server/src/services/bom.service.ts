@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { assertCan } from '../config/permissions';
+import { assertAnyModuleAccess, assertCan } from '../config/permissions';
 import { AppError, notFound } from '../lib/errors';
 import { type ListQuery, type Paged, paging } from '../lib/listQuery';
 import { type Db, prisma, transaction } from '../lib/prisma';
@@ -121,8 +121,14 @@ export async function createBom(user: AuthUser, input: BomInput): Promise<BomDTO
 export async function updateBom(user: AuthUser, id: number, input: BomInput): Promise<BomDTO> {
   assertCan(user, 'BOM', 'edit');
   return transaction(async (tx) => {
-    const before = await tx.bom.findUnique({ where: { id } });
+    const before = await tx.bom.findUnique({ where: { id }, include: { defaultFor: true } });
     if (!before) throw notFound('Bill of materials');
+    if (input.productId !== before.productId) {
+      const usedByMo = await tx.manufacturingOrder.count({ where: { bomId: id } });
+      if (usedByMo > 0 || before.defaultFor) {
+        throw new AppError(409, 'IN_USE', "This bill of materials is in use, so its finished product can't change. Create a new BoM instead.");
+      }
+    }
     await validateRefs(tx, input);
     const beforeLines = await linesSummary(tx, id);
     await tx.bomComponent.deleteMany({ where: { bomId: id } });
@@ -174,7 +180,8 @@ export async function listBoms(user: AuthUser, q: ListQuery & { productId?: numb
 }
 
 /** BoMs for a product, for dropdowns (MO form, product form). No module permission needed beyond login. */
-export async function bomOptions(productId?: number) {
+export async function bomOptions(user: AuthUser, productId?: number) {
+  assertAnyModuleAccess(user);
   return prisma.bom.findMany({
     where: { productId },
     select: { id: true, reference: true, productId: true, outputQty: true },

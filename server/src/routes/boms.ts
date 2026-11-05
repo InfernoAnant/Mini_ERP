@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 
 router.get('/options', async (req, res) => {
   const productId = z.coerce.number().int().optional().parse(req.query.productId);
-  res.json(serialize(await boms.bomOptions(productId)));
+  res.json(serialize(await boms.bomOptions(currentUser(req), productId)));
 });
 
 router.post('/', async (req, res) => {

@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { assertCan, assertCanEdit } from '../config/permissions';
+import { assertAnyModuleAccess, assertCan, assertCanEdit } from '../config/permissions';
 import { dec } from '../lib/decimal';
 import { AppError, notFound } from '../lib/errors';
 import { type ListQuery, type Paged, paging } from '../lib/listQuery';
@@ -78,6 +78,8 @@ async function validateProcurement(db: Db, productId: number | null, v: Procurem
     const vendor = await db.contact.findUnique({ where: { id: v.vendorId } });
     if (!vendor || vendor.type !== 'VENDOR') throw new AppError(400, 'VALIDATION_ERROR', 'vendorId: Not a vendor');
   }
+  // A brand-new product can't have a BoM yet; it may be set later (procurement skips it until then).
+  if (productId === null) return;
   if (v.procureOnDemand && v.procurementType === 'MANUFACTURING') {
     if (!v.defaultBomId) throw new AppError(400, 'BOM_REQUIRED', 'A bill of materials is required for Manufacturing procurement');
     const bom = await db.bom.findUnique({ where: { id: v.defaultBomId } });
@@ -181,7 +183,8 @@ export async function listProducts(
 }
 
 /** Lightweight options for dropdowns (any logged-in user who can view something). */
-export async function productOptions() {
+export async function productOptions(user: AuthUser) {
+  assertAnyModuleAccess(user);
   const rows = await prisma.product.findMany({
     orderBy: { name: 'asc' },
     select: { id: true, name: true, unit: true, salesPrice: true, costPrice: true, onHand: true, defaultBomId: true },

@@ -1,5 +1,6 @@
 import type { AccessLevel, Module, Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { assertAnyModuleAccess } from '../config/permissions';
 import { AppError, notFound } from '../lib/errors';
 import { paging } from '../lib/listQuery';
 import { type Tx, prisma, transaction } from '../lib/prisma';
@@ -28,6 +29,12 @@ const ADMIN_FIELDS = [...PROFILE_FIELDS, 'position', 'readOnly'];
 function publicUser(u: Prisma.UserGetPayload<{ include: { access: true } }>) {
   return { ...toAuthUser(u), address: u.address, mobile: u.mobile, photoUrl: u.photoUrl, createdAt: u.createdAt };
 }
+
+/** The demo admin is shared by anonymous visitors: never show real sign-ups' contact details to it. */
+function visibleTo(actor: AuthUser, u: UserDTO): UserDTO {
+  if (!actor.isDemoLocked || u.isDemoLocked) return u;
+  return { ...u, email: 'hidden in the public demo', address: null, mobile: null, photoUrl: null };
+}
 export type UserDTO = ReturnType<typeof publicUser>;
 
 function base(actor: AuthUser, target: { id: number; loginId: string }): AuditBase {
@@ -53,16 +60,17 @@ export async function listUsers(actor: AuthUser, q: { q?: string; page: number; 
     prisma.user.findMany({ where, include: { access: true }, orderBy: { id: 'asc' }, ...paging(q) }),
     prisma.user.count({ where }),
   ]);
-  return { items: rows.map(publicUser), total, page: q.page, pageSize: q.pageSize };
+  return { items: rows.map((r) => visibleTo(actor, publicUser(r))), total, page: q.page, pageSize: q.pageSize };
 }
 
 export async function getUser(actor: AuthUser, id: number): Promise<UserDTO> {
   assertSystemAdmin(actor);
-  return publicUser(await loadUser(prisma, id));
+  return visibleTo(actor, publicUser(await loadUser(prisma, id)));
 }
 
 /** id + name of every user, for assignee/salesperson dropdowns. */
-export function userOptions() {
+export function userOptions(actor: AuthUser) {
+  assertAnyModuleAccess(actor);
   return prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } });
 }
 
@@ -89,7 +97,7 @@ export async function adminUpdateUser(actor: AuthUser, id: number, input: z.infe
     if (before.isDemoLocked && changesLockedField) throw demoLocked();
     const after = await tx.user.update({ where: { id }, data: input, include: { access: true } });
     await logChanges(tx, base(actor, before), before, after, ADMIN_FIELDS);
-    return publicUser(after);
+    return visibleTo(actor, publicUser(after));
   });
 }
 
@@ -114,7 +122,7 @@ export async function setAccess(actor: AuthUser, id: number, access: Partial<Rec
     }
     const order = Object.keys(access).map((m) => `access.${m}`);
     await logChanges(tx, base(actor, before), beforeMap, afterMap, order);
-    return publicUser(await loadUser(tx, id));
+    return visibleTo(actor, publicUser(await loadUser(tx, id)));
   });
 }
 

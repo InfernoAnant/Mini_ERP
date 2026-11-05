@@ -66,13 +66,13 @@ export function signToken(user: AuthUser): string {
   });
 }
 
-/** Returns the user id from a valid token, or null. */
-export function verifyToken(token: string): number | null {
+/** Returns the user id and issue time (seconds) from a valid token, or null. */
+export function verifyToken(token: string): { id: number; iat: number } | null {
   try {
     const payload = jwt.verify(token, secret());
-    if (typeof payload === 'string' || !payload.sub) return null;
+    if (typeof payload === 'string' || !payload.sub || typeof payload.iat !== 'number') return null;
     const id = Number(payload.sub);
-    return Number.isInteger(id) ? id : null;
+    return Number.isInteger(id) ? { id, iat: payload.iat } : null;
   } catch {
     return null;
   }
@@ -81,6 +81,19 @@ export function verifyToken(token: string): number | null {
 export async function loadAuthUser(id: number): Promise<AuthUser | null> {
   const user = await prisma.user.findUnique({ where: { id }, include: { access: true } });
   return user ? toAuthUser(user) : null;
+}
+
+/**
+ * The user a session token belongs to. Ids restart after a demo reset, so a token issued before the
+ * account was created belongs to someone else and is rejected. Demo accounts are re-created identically
+ * on every reset, so their sessions stay valid.
+ */
+export async function loadSessionUser(token: { id: number; iat: number }): Promise<AuthUser | null> {
+  const user = await prisma.user.findUnique({ where: { id: token.id }, include: { access: true } });
+  if (!user) return null;
+  const issuedBeforeAccount = token.iat * 1000 + 1000 < user.createdAt.getTime();
+  if (issuedBeforeAccount && !user.isDemoLocked) return null;
+  return toAuthUser(user);
 }
 
 export async function signup(input: SignupInput): Promise<AuthUser> {

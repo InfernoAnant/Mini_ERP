@@ -1,6 +1,6 @@
 import type { Request, RequestHandler } from 'express';
 import { AppError } from '../lib/errors';
-import { type AuthUser, loadAuthUser, verifyToken } from '../services/auth.service';
+import { type AuthUser, loadSessionUser, verifyToken } from '../services/auth.service';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -10,8 +10,8 @@ declare module 'express-serve-static-core' {
 
 export const requireAuth: RequestHandler = async (req, _res, next) => {
   const token: unknown = req.cookies?.token;
-  const id = typeof token === 'string' ? verifyToken(token) : null;
-  const user = id === null ? null : await loadAuthUser(id);
+  const session = typeof token === 'string' ? verifyToken(token) : null;
+  const user = session === null ? null : await loadSessionUser(session);
   if (!user) throw new AppError(401, 'UNAUTHENTICATED', 'Please log in');
   req.user = user;
   next();

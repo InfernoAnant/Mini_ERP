@@ -1,5 +1,6 @@
 import type { ContactType } from '@prisma/client';
 import { z } from 'zod';
+import { assertAnyModuleAccess } from '../config/permissions';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import type { AuthUser } from './auth.service';
@@ -10,11 +11,13 @@ export const contactSchema = z.object({
   type: z.enum(['CUSTOMER', 'VENDOR']),
 });
 
-export function listContacts(type?: ContactType) {
+export function listContacts(user: AuthUser, type?: ContactType) {
+  assertAnyModuleAccess(user);
   return prisma.contact.findMany({ where: { type }, orderBy: { name: 'asc' } });
 }
 
-export function listWorkCenters() {
+export function listWorkCenters(user: AuthUser) {
+  assertAnyModuleAccess(user);
   return prisma.workCenter.findMany({ orderBy: { name: 'asc' } });
 }
 

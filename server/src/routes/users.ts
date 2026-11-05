@@ -13,8 +13,8 @@ router.get('/me', async (req, res) => {
 router.patch('/me', async (req, res) => {
   res.json(await users.updateProfile(currentUser(req), users.profileSchema.parse(req.body)));
 });
-router.get('/options', async (_req, res) => {
-  res.json(await users.userOptions());
+router.get('/options', async (req, res) => {
+  res.json(await users.userOptions(currentUser(req)));
 });
 router.get('/', async (req, res) => {
   const q = z

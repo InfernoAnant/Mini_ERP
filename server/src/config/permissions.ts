@@ -31,6 +31,12 @@ export function assertCan(user: AuthUser, module: Module, action: Action): void 
   }
 }
 
+/** Shared lookup data (product/contact/user/BoM dropdowns) needs access to at least one module (spec §3: NONE → 403). */
+export function assertAnyModuleAccess(user: AuthUser): void {
+  const any = user.isSystemAdmin || Object.values(user.access).some((level) => level !== 'NONE');
+  if (!any) throw new AppError(403, 'FORBIDDEN', "You don't have access to any module yet");
+}
+
 /** ADMIN may edit anything; USER only their own DRAFT (or status-less) records. */
 export function assertCanEdit(user: AuthUser, module: Module, record: { status?: string; createdById: number }): void {
   assertCan(user, module, 'edit');

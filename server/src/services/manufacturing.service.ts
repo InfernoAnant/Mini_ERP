@@ -11,7 +11,7 @@ import type { AuthUser } from './auth.service';
 import { hasPendingOperation, operationsForOrder, rejectPendingForOrder } from './operations.service';
 import { invalidTransition } from './purchase.service';
 import { nextRef } from './reference.service';
-import { getLevels } from './stock.service';
+import { getLevels, lockProducts } from './stock.service';
 
 export const moInputSchema = z.object({
   productId: z.coerce.number().int().positive(),
@@ -210,7 +210,9 @@ export async function updateMo(user: AuthUser, id: number, input: MoUpdate): Pro
         const newQty = dec(input.quantity);
         const ratio = newQty.dividedBy(before.quantity);
         const demands: { productId: number; quantity: Prisma.Decimal; freeBefore: Prisma.Decimal }[] = [];
-        const levels = newQty.greaterThan(before.quantity) ? await getLevels(tx, before.components.map((c) => c.productId)) : null;
+        const increasing = newQty.greaterThan(before.quantity);
+        if (increasing) await lockProducts(tx, before.components.map((c) => c.productId));
+        const levels = increasing ? await getLevels(tx, before.components.map((c) => c.productId)) : null;
         for (const c of before.components) {
           const toConsume = c.toConsume.times(ratio).toDecimalPlaces(3);
           await tx.moComponent.update({ where: { id: c.id }, data: { toConsume } });
@@ -248,7 +250,8 @@ export async function confirmMo(user: AuthUser, id: number): Promise<{ order: Mo
     await lock(tx, id);
     const mo = await load(tx, id);
     if (mo.status !== 'DRAFT') throw invalidTransition('confirm', mo.status);
-    // Free-to-use before this MO's own reservation takes effect.
+    // Free-to-use before this MO's own reservation takes effect (locked, so concurrent confirms can't both read it).
+    await lockProducts(tx, mo.components.map((c) => c.productId));
     const levels = await getLevels(tx, mo.components.map((c) => c.productId));
     await tx.manufacturingOrder.update({ where: { id }, data: { status: 'CONFIRMED' } });
     await logStatus(tx, base(user, mo), mo.status, 'CONFIRMED');
