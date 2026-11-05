@@ -63,3 +63,45 @@ export async function agentFor(user: User): Promise<ReturnType<typeof request.ag
   if (res.status !== 200) throw new Error(`login failed for ${user.loginId}: ${res.status} ${JSON.stringify(res.body)}`);
   return agent;
 }
+
+import type { Contact, ContactType, Product } from '@prisma/client';
+
+let fixtureCounter = 0;
+
+export async function makeContact(type: ContactType, name?: string): Promise<Contact> {
+  fixtureCounter += 1;
+  return prisma.contact.create({ data: { type, name: name ?? `${type} ${fixtureCounter}`, address: 'Somewhere 1' } });
+}
+
+/** Product with onHand set directly AND a matching ADJUSTMENT ledger row (keeps ledger == onHand). */
+export async function makeProduct(opts: {
+  name?: string;
+  onHand?: number | string;
+  salesPrice?: number;
+  costPrice?: number;
+  procureOnDemand?: boolean;
+  procurementType?: 'PURCHASE' | 'MANUFACTURING';
+  vendorId?: number;
+  createdById?: number;
+} = {}): Promise<Product> {
+  fixtureCounter += 1;
+  const onHand = String(opts.onHand ?? 0);
+  const product = await prisma.product.create({
+    data: {
+      name: opts.name ?? `Product ${fixtureCounter}`,
+      salesPrice: opts.salesPrice ?? 100,
+      costPrice: opts.costPrice ?? 60,
+      onHand,
+      procureOnDemand: opts.procureOnDemand ?? false,
+      procurementType: opts.procurementType ?? null,
+      vendorId: opts.vendorId ?? null,
+      createdById: opts.createdById ?? 0,
+    },
+  });
+  if (Number(onHand) !== 0) {
+    await prisma.stockMove.create({
+      data: { productId: product.id, quantity: onHand, type: 'ADJUSTMENT', reference: 'FIXTURE', userId: 0 },
+    });
+  }
+  return product;
+}
