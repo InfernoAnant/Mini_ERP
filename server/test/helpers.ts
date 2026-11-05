@@ -48,12 +48,26 @@ export async function makeUser(opts: MakeUserOpts = {}): Promise<User> {
 
 import request from 'supertest';
 import type { Express } from 'express';
+import http, { type Server } from 'node:http';
 import { createApp } from '../src/app';
 
-let sharedApp: Express | null = null;
-export function app(): Express {
-  sharedApp ??= createApp();
-  return sharedApp;
+let sharedServer: Server | null = null;
+/**
+ * One listening HTTP server per test file. (Passing the bare Express app makes supertest open and
+ * close a server for every request; on Windows + Node 24 that churn intermittently aborts the worker.)
+ */
+export function app(): Server {
+  if (!sharedServer) {
+    const express: Express = createApp();
+    sharedServer = http.createServer(express).listen(0);
+  }
+  return sharedServer;
+}
+
+export async function closeServer(): Promise<void> {
+  const s = sharedServer;
+  sharedServer = null;
+  if (s) await new Promise<void>((resolve) => s.close(() => resolve()));
 }
 
 /** A supertest agent logged in as the given user (cookie kept between calls). */

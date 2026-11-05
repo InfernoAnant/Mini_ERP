@@ -4,6 +4,7 @@ import { errorHandler, notFoundHandler } from './lib/errors';
 import auditRoutes from './routes/audit';
 import authRoutes from './routes/auth';
 import bomRoutes from './routes/boms';
+import { dashboardRouter, demoRouter } from './routes/dashboard';
 import { contactsRouter, workCentersRouter } from './routes/contacts';
 import manufacturingRoutes from './routes/manufacturing';
 import operationRoutes from './routes/operations';
@@ -33,6 +34,8 @@ export function createApp(): Express {
   app.use('/api/sales', salesRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/operations', operationRoutes);
+  app.use('/api/dashboard', dashboardRouter);
+  app.use('/api/demo', demoRouter);
   app.use('/api/contacts', contactsRouter);
   app.use('/api/work-centers', workCentersRouter);
 
