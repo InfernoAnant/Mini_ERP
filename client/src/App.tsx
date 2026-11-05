@@ -8,6 +8,8 @@ import SignupPage from './pages/auth/SignupPage';
 import ProductFormPage from './pages/products/ProductFormPage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import { PurchaseFormPage, PurchaseListPage } from './pages/purchase/PurchasePages';
+import { SalesFormPage, SalesListPage } from './pages/sales/SalesPages';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -37,6 +39,10 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="products" element={<ProductListPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />
+        <Route path="sales" element={<SalesListPage />} />
+        <Route path="sales/:id" element={<SalesFormPage />} />
+        <Route path="purchase" element={<PurchaseListPage />} />
+        <Route path="purchase/:id" element={<PurchaseFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
