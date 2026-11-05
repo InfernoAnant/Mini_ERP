@@ -107,7 +107,7 @@ No stock changes the moment someone clicks Deliver, Receive, Produce or Adjust s
 - Confirming re-checks everything (e.g. enough on-hand to deliver), then in one transaction writes the Stock Moves, updates on-hand, updates the source order's delivered/received/produced quantities and status, and writes audit rows.
 - An operation can be **rejected** instead of confirmed, with a reason; nothing moves.
 - While placed, the quantities stay reserved, and a second operation can't claim the same remaining quantity.
-- Who can confirm: anyone with USER or ADMIN access on the related module (Sales for deliveries, Purchase for receipts, Manufacturing for production, ADMIN on Products for adjustments) *(builder's call)*.
+- **Who can confirm (user's decision: "supervisor and manager can confirm operations"):** anyone may *place* an operation with USER access on the related module, but only a supervisor or manager may *confirm or reject* it. Mapped onto the access model as *(builder's interpretation)*: ADMIN on the related module (Sales for deliveries, Purchase for receipts, Manufacturing for production), **or** ADMIN on Products (the Inventory manager, who supervises all stock), or the System Administrator. Adjustments: ADMIN on Products. A manager may confirm their own placed operation.
 - Screens: each order form lists its operations with Confirm / Reject buttons; a **Stock Operations** page lists everything awaiting confirmation; the dashboard shows an "Awaiting confirmation" count.
 
 ## 6. Workflows
