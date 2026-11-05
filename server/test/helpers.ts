@@ -105,3 +105,37 @@ export async function makeProduct(opts: {
   }
   return product;
 }
+
+/** Wooden Table with the brief's BoM: 4 legs + 1 top + 12 screws; Assembly 60, Painting 30, Packing 20. */
+export async function tableWithBom(createdById: number) {
+  const table = await makeProduct({ name: 'Wooden Table' });
+  const legs = await makeProduct({ name: 'Wooden Legs', onHand: 100 });
+  const top = await makeProduct({ name: 'Wooden Top', onHand: 100 });
+  const screws = await makeProduct({ name: 'Screws', onHand: 1000 });
+  const [assembly, paint, pack] = await Promise.all(
+    ['Assembly Line', 'Paint Floor', 'Packaging Unit'].map((name) => prisma.workCenter.create({ data: { name } })),
+  );
+  const bom = await prisma.bom.create({
+    data: {
+      reference: 'BOM-000001',
+      productId: table.id,
+      createdById,
+      components: {
+        create: [
+          { productId: legs.id, quantity: 4 },
+          { productId: top.id, quantity: 1 },
+          { productId: screws.id, quantity: 12 },
+        ],
+      },
+      operations: {
+        create: [
+          { sequence: 1, name: 'Assembly', workCenterId: assembly!.id, durationMinutes: 60 },
+          { sequence: 2, name: 'Painting', workCenterId: paint!.id, durationMinutes: 30 },
+          { sequence: 3, name: 'Packing', workCenterId: pack!.id, durationMinutes: 20 },
+        ],
+      },
+    },
+  });
+  return { table, legs, top, screws, bom };
+}
+

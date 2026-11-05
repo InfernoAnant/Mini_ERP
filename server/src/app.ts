@@ -5,7 +5,9 @@ import auditRoutes from './routes/audit';
 import authRoutes from './routes/auth';
 import bomRoutes from './routes/boms';
 import { contactsRouter, workCentersRouter } from './routes/contacts';
+import manufacturingRoutes from './routes/manufacturing';
 import productRoutes from './routes/products';
+import purchaseRoutes from './routes/purchase';
 
 export function createApp(): Express {
   const app = express();
@@ -21,6 +23,8 @@ export function createApp(): Express {
   app.use('/api/audit', auditRoutes);
   app.use('/api/products', productRoutes);
   app.use('/api/boms', bomRoutes);
+  app.use('/api/purchase', purchaseRoutes);
+  app.use('/api/manufacturing', manufacturingRoutes);
   app.use('/api/contacts', contactsRouter);
   app.use('/api/work-centers', workCentersRouter);
 
