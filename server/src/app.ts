@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
 import { errorHandler, notFoundHandler } from './lib/errors';
+import auditRoutes from './routes/audit';
 import authRoutes from './routes/auth';
 
 export function createApp(): Express {
@@ -14,6 +15,7 @@ export function createApp(): Express {
   });
 
   app.use('/api/auth', authRoutes);
+  app.use('/api/audit', auditRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
