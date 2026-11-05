@@ -5,24 +5,23 @@ import { Spinner } from './components/ui';
 import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import AuditPage from './pages/audit/AuditPage';
 import { BomFormPage, BomListPage } from './pages/boms/BomPages';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import OperationsPage from './pages/operations/OperationsPage';
 import { MoFormPage, MoListPage } from './pages/manufacturing/MoPages';
 import ProductFormPage from './pages/products/ProductFormPage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import { PurchaseFormPage, PurchaseListPage } from './pages/purchase/PurchasePages';
 import { SalesFormPage, SalesListPage } from './pages/sales/SalesPages';
+import { UserFormPage, UserListPage } from './pages/users/UserPages';
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <Spinner />;
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
-}
-
-function Home() {
-  const { user } = useAuth();
-  return <h1 className="text-xl font-semibold">Welcome, {user?.name}</h1>;
 }
 
 export default function App() {
@@ -37,7 +36,7 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<Home />} />
+        <Route index element={<DashboardPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="products" element={<ProductListPage />} />
         <Route path="products/:id" element={<ProductFormPage />} />
@@ -49,6 +48,10 @@ export default function App() {
         <Route path="manufacturing/:id" element={<MoFormPage />} />
         <Route path="boms" element={<BomListPage />} />
         <Route path="boms/:id" element={<BomFormPage />} />
+        <Route path="operations" element={<OperationsPage />} />
+        <Route path="audit" element={<AuditPage />} />
+        <Route path="users" element={<UserListPage />} />
+        <Route path="users/:id" element={<UserFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
