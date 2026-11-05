@@ -5,6 +5,8 @@ import { Spinner } from './components/ui';
 import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import { BomFormPage, BomListPage } from './pages/boms/BomPages';
+import { MoFormPage, MoListPage } from './pages/manufacturing/MoPages';
 import ProductFormPage from './pages/products/ProductFormPage';
 import ProductListPage from './pages/products/ProductListPage';
 import ProfilePage from './pages/profile/ProfilePage';
@@ -43,6 +45,10 @@ export default function App() {
         <Route path="sales/:id" element={<SalesFormPage />} />
         <Route path="purchase" element={<PurchaseListPage />} />
         <Route path="purchase/:id" element={<PurchaseFormPage />} />
+        <Route path="manufacturing" element={<MoListPage />} />
+        <Route path="manufacturing/:id" element={<MoFormPage />} />
+        <Route path="boms" element={<BomListPage />} />
+        <Route path="boms/:id" element={<BomFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
