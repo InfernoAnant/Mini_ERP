@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccessLevel {
+  ADMIN
+  USER
+  NONE
+}
+
+enum Module {
+  SALES
+  PURCHASE
+  MANUFACTURING
+  BOM
+  PRODUCTS
+}
+
+enum AuditModule {
+  SALES
+  PURCHASE
+  MANUFACTURING
+  BOM
+  PRODUCTS
+  STOCK
+  USERS
+}
+
+enum ProcurementType {
+  PURCHASE
+  MANUFACTURING
+}
+
+enum ContactType {
+  CUSTOMER
+  VENDOR
+}
+
+enum SalesStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_DELIVERED
+  FULLY_DELIVERED
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_RECEIVED
+  FULLY_RECEIVED
+  CANCELLED
+}
+
+enum MoStatus {
+  DRAFT
+  CONFIRMED
+  IN_PROGRESS
+  TO_CLOSE
+  DONE
+  CANCELLED
+}
+
+enum WorkOrderStatus {
+  PENDING
+  DONE
+}
+
+enum OperationType {
+  DELIVERY
+  RECEIPT
+  PRODUCTION
+  ADJUSTMENT
+}
+
+enum OperationStatus {
+  PLACED
+  CONFIRMED
+  REJECTED
+}
+
+enum StockMoveType {
+  RECEIPT
+  DELIVERY
+  MO_CONSUME
+  MO_PRODUCE
+  ADJUSTMENT
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  loginId       String       @unique
+  email         String       @unique
+  passwordHash  String
+  name          String
+  address       String?
+  mobile        String?
+  photoUrl      String?
+  position      String?
+  isSystemAdmin Boolean      @default(false)
+  readOnly      Boolean      @default(false)
+  isDemoLocked  Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  access        UserAccess[]
+}
+
+model UserAccess {
+  userId Int
+  module Module
+  level  AccessLevel
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, module])
+}
+
+model Contact {
+  id             Int             @id @default(autoincrement())
+  name           String
+  address        String?
+  type           ContactType
+  products       Product[]       @relation("ProductVendor")
+  salesOrders    SalesOrder[]
+  purchaseOrders PurchaseOrder[]
+}
+
+model Product {
+  id              Int                  @id @default(autoincrement())
+  name            String               @unique
+  unit            String               @default("Units")
+  salesPrice      Decimal              @db.Decimal(12, 2)
+  costPrice       Decimal              @db.Decimal(12, 2)
+  onHand          Decimal              @default(0) @db.Decimal(12, 3)
+  procureOnDemand Boolean              @default(false)
+  procurementType ProcurementType?
+  vendorId        Int?
+  vendor          Contact?             @relation("ProductVendor", fields: [vendorId], references: [id])
+  defaultBomId    Int?                 @unique
+  defaultBom      Bom?                 @relation("ProductDefaultBom", fields: [defaultBomId], references: [id])
+  boms            Bom[]                @relation("BomProduct")
+  salesLines      SalesOrderLine[]
+  purchaseLines   PurchaseOrderLine[]
+  mos             ManufacturingOrder[]
+  moComponents    MoComponent[]
+  bomComponents   BomComponent[]
+  stockMoves      StockMove[]
+  operationLines  StockOperationLine[]
+  createdById     Int
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model WorkCenter {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  bomOperations BomOperation[]
+  workOrders    WorkOrder[]
+}
+
+model Bom {
+  id          Int                  @id @default(autoincrement())
+  reference   String               @unique
+  productId   Int
+  product     Product              @relation("BomProduct", fields: [productId], references: [id])
+  defaultFor  Product?             @relation("ProductDefaultBom")
+  outputQty   Decimal              @default(1) @db.Decimal(12, 3)
+  components  BomComponent[]
+  operations  BomOperation[]
+  mos         ManufacturingOrder[]
+  createdById Int
+  createdAt   DateTime             @default(now())
+}
+
+model BomComponent {
+  id        Int     @id @default(autoincrement())
+  bomId     Int
+  bom       Bom     @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Decimal @db.Decimal(12, 3)
+}
+
+model BomOperation {
+  id              Int        @id @default(autoincrement())
+  bomId           Int
+  bom             Bom        @relation(fields: [bomId], references: [id], onDelete: Cascade)
+  sequence        Int
+  name            String
+  workCenterId    Int
+  workCenter      WorkCenter @relation(fields: [workCenterId], references: [id])
+  durationMinutes Int
+}
+
+model SalesOrder {
+  id              Int              @id @default(autoincrement())
+  reference       String           @unique
+  customerId      Int
+  customer        Contact          @relation(fields: [customerId], references: [id])
+  customerAddress String?
+  salespersonId   Int?
+  scheduledDate   DateTime?
+  status          SalesStatus      @default(DRAFT)
+  createdById     Int
+  createdAt       DateTime         @default(now())
+  confirmedAt     DateTime?
+  lines           SalesOrderLine[]
+}
+
+model SalesOrderLine {
+  id           Int        @id @default(autoincrement())
+  orderId      Int
+  order        SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    Int
+  product      Product    @relation(fields: [productId], references: [id])
+  quantity     Decimal    @db.Decimal(12, 3)
+  deliveredQty Decimal    @default(0) @db.Decimal(12, 3)
+  unitPrice    Decimal    @db.Decimal(12, 2)
+}
+
+model PurchaseOrder {
+  id            Int                 @id @default(autoincrement())
+  reference     String              @unique
+  vendorId      Int
+  vendor        Contact             @relation(fields: [vendorId], references: [id])
+  vendorAddress String?
+  responsibleId Int?
+  expectedDate  DateTime?
+  status        PurchaseStatus      @default(DRAFT)
+  origin        String?
+  createdById   Int
+  createdAt     DateTime            @default(now())
+  lines         PurchaseOrderLine[]
+}
+
+model PurchaseOrderLine {
+  id          Int           @id @default(autoincrement())
+  orderId     Int
+  order       PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product       @relation(fields: [productId], references: [id])
+  quantity    Decimal       @db.Decimal(12, 3)
+  receivedQty Decimal       @default(0) @db.Decimal(12, 3)
+  unitCost    Decimal       @db.Decimal(12, 2)
+}
+
+model ManufacturingOrder {
+  id          Int           @id @default(autoincrement())
+  reference   String        @unique
+  productId   Int
+  product     Product       @relation(fields: [productId], references: [id])
+  quantity    Decimal       @db.Decimal(12, 3)
+  bomId       Int
+  bom         Bom           @relation(fields: [bomId], references: [id])
+  assigneeId  Int?
+  deadline    DateTime?
+  status      MoStatus      @default(DRAFT)
+  origin      String?
+  createdById Int
+  createdAt   DateTime      @default(now())
+  components  MoComponent[]
+  workOrders  WorkOrder[]
+}
+
+model MoComponent {
+  id        Int                @id @default(autoincrement())
+  moId      Int
+  mo        ManufacturingOrder @relation(fields: [moId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product            @relation(fields: [productId], references: [id])
+  toConsume Decimal            @db.Decimal(12, 3)
+  consumed  Decimal            @default(0) @db.Decimal(12, 3)
+}
+
+model WorkOrder {
+  id              Int                @id @default(autoincrement())
+  moId            Int
+  mo              ManufacturingOrder @relation(fields: [moId], references: [id], onDelete: Cascade)
+  sequence        Int
+  name            String
+  workCenterId    Int
+  workCenter      WorkCenter         @relation(fields: [workCenterId], references: [id])
+  expectedMinutes Int
+  realMinutes     Int?
+  status          WorkOrderStatus    @default(PENDING)
+}
+
+model StockOperation {
+  id                   Int                  @id @default(autoincrement())
+  reference            String               @unique
+  type                 OperationType
+  status               OperationStatus      @default(PLACED)
+  salesOrderId         Int?
+  purchaseOrderId      Int?
+  manufacturingOrderId Int?
+  productId            Int?
+  targetQty            Decimal?             @db.Decimal(12, 3)
+  reason               String?
+  placedById           Int
+  placedAt             DateTime             @default(now())
+  decidedById          Int?
+  decidedAt            DateTime?
+  rejectReason         String?
+  lines                StockOperationLine[]
+}
+
+model StockOperationLine {
+  id                  Int            @id @default(autoincrement())
+  operationId         Int
+  operation           StockOperation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+  productId           Int
+  product             Product        @relation(fields: [productId], references: [id])
+  quantity            Decimal        @db.Decimal(12, 3)
+  salesOrderLineId    Int?
+  purchaseOrderLineId Int?
+}
+
+model StockMove {
+  id          Int           @id @default(autoincrement())
+  productId   Int
+  product     Product       @relation(fields: [productId], references: [id])
+  quantity    Decimal       @db.Decimal(12, 3)
+  type        StockMoveType
+  reference   String
+  operationId Int?
+  userId      Int
+  createdAt   DateTime      @default(now())
+
+  @@index([productId])
+}
+
+model AuditLog {
+  id         Int         @id @default(autoincrement())
+  createdAt  DateTime    @default(now())
+  userId     Int?
+  module     AuditModule
+  recordType String
+  recordId   Int
+  reference  String?
+  action     AuditAction
+  field      String?
+  oldValue   String?
+  newValue   String?
+  note       String?
+
+  @@index([createdAt])
+  @@index([module, recordId])
+}
+
+model Sequence {
+  prefix String @id
+  value  Int    @default(0)
+}
