@@ -1,0 +1,487 @@
+Mini ERP: From Demand to Delivery
+
+Overview
+
+Modern businesses still struggle with disconnected spreadsheets, manual inventory tracking,
+delayed procurement decisions, and lack of visibility across Sales, Purchase, Manufacturing,
+and Stock operations.
+
+Your challenge is to build a Mini ERP System that digitally manages the complete business
+flow:
+
+     Product Management
+     Sales Management
+     Purchase Management
+     Manufacturing
+     Bill of Materials (BoM)
+     Inventory & Stock Tracking
+     Procurement Automation
+
+The goal is to help businesses move from:
+
+Manual operations       Centralized operations
+
+Spreadsheet dependency  Real-time stock visibility
+
+Stock confusion         Automated procurement
+
+Delayed procurement     Manufacturing tracking
+
+Production bottlenecks  End-to-end traceability
+
+The Business Problem
+
+Meet "Shiv Furniture Works"
+
+Shiv Furniture is a growing furniture manufacturing company.
+Initially, they managed operations using:
+      Excel sheets
+      WhatsApp messages
+      Manual stock registers
+      Paper-based manufacturing notes
+
+As customer demand increased, problems started appearing:
+
+Sales Team Problems
+
+      Sales team sold products without checking stock.
+      Customers received delayed deliveries.
+      No visibility on available inventory.
+
+Purchase Team Problems
+
+      Purchase managers didn't know when raw materials were running low.
+      Vendors received urgent last-minute purchase requests.
+
+Manufacturing Team Problems
+
+      Operators didn't know what to manufacture next.
+      BoMs were maintained on paper.
+      Work orders were not tracked.
+
+Inventory Problems
+
+      No accurate stock balance.
+      Components consumed manually.
+      Finished goods not updated correctly.
+
+Management Problems
+
+Owners had no visibility into:
+      Pending orders
+      Production delays
+      Material shortages
+      Manufacturing efficiency
+
+The Goal
+
+Build a centralized Mini ERP system that allows Shiv Furniture to:
+ Manage products and inventory
+ Process sales and purchase operations
+ Manufacture products using BoMs
+ Track stock movement automatically
+ Trigger procurement automatically
+ Support Make To Stock (MTS)
+ Support Make To Order (MTO)
+ Maintain audit logs for traceability
+
+Core ERP Concept
+
+The entire ERP revolves around one thing: Inventory Movement
+
+Every module affects stock:
+
+                    Module                                   Impact
+Sales                                   Decreases stock
+Purchase                                Increases stock
+Manufacturing Components                Consumes stock
+Manufacturing Finished Goods            Produces stock
+Procurement                             Replenishes stock
+
+Core Modules
+
+The ERP consists of 5 major modules:
+
+    1. Products
+    2. Sales
+    3. Purchase
+    4. Manufacturing
+    5. Bill of Materials (BoM)
+
+Additional:
+
+    1. Audit Logs
+    2. User Access Rights
+Target Users                                                   Responsibility
+                                                Full system access
+                               User Type        Manage sales orders
+            Admin                               Manage purchase orders
+            Sales User                          Handle manufacturing orders
+            Purchase User                       Track stock movement
+            Manufacturing User                  Monitor business flow (manages
+            Inventory Manager                   product)
+            Business Owner
+
+Authentication & Access Rights
+
+ Each module should support role-based access:
+
+       Access Type                                               Description
+                                                Full access
+Admin                                           Limited module access
+User                                            No access
+None
+
+Example:
+
+     Sales Users may only access Sales.
+     Manufacturing Users may only access Manufacturing.
+     Admin can access everything including Audit Logs.
+
+Core Business Flow
+Step 1 ­ Product Creation
+
+Products are created with:
+      Sales Price
+      Cost Price
+      Stock Quantity
+      Procurement Strategy
+
+Example:
+      Wooden Table
+      Office Chair
+      Dining Table
+
+Step 2 ­ Procurement Strategy
+
+Every product can use either:
+
+MTS ­ Make To Stock
+
+OR
+
+MTO ­ Make To Order
+
+Understanding MTS (Make To Stock)
+
+Products are manufactured or purchased BEFORE customer demand.
+
+Example: Make To Stock
+
+Current Stock:
+      Wooden Chair = 100 Units
+
+Customer orders:
+      10 Wooden Chairs
+
+Result
+
+The system delivers directly from stock.
+
+No procurement needed.
+
+Understanding MTO (Make To Order)
+
+Products are manufactured or purchased ONLY when a customer order arrives.
+
+Example: Make To Order
+
+Current Stock:
+      Wooden Table = 2 Units
+
+Customer orders:
+      10 Wooden Tables
+
+Shortage:
+      8 Units
+
+System should automatically:
+     Create Purchase Order
+         OR
+
+     Create Manufacturing Order
+depending on procurement configuration.
+
+Procurement Automation                                            Description
+                                                 Enable automatic replenishment
+   Each product can be configured with           Purchase / Manufacturing
+                                                 Used for Purchase
+                                    Field        Used for Manufacturing
+             Procure on Demand
+             Procurement Type
+             Vendor
+             BoM
+
+Example Procurement Flow
+
+ Scenario
+
+   Customer orders:
+         20 Dining Tables
+
+   Available stock:
+        5
+
+   Shortage:
+         15
+
+   If Procurement Type = Manufacturing:
+   System auto creates:
+
+         Manufacturing Order for 15 units
+   If Procurement Type = Purchase:
+   System auto creates:
+
+         Purchase Order for 15 units
+
+Product Module
+
+   Products act as the central inventory model.
+Features
+
+     Product creation
+     Sales price
+     Cost price
+     On-hand quantity
+     Free-to-use quantity
+     Reserved quantity
+     Procurement setup
+     Stock visibility
+
+Inventory Concepts
+
+On Hand Quantity
+
+Actual physical stock.
+
+Reserved Quantity
+
+Stock already committed to:
+     Sales Orders
+     Manufacturing Orders
+
+Free To Use Quantity
+
+Available stock after reservations.
+
+Formula
+
+Free To Use Qty = On Hand Qty - Reserved Qty
+Sales Module
+
+The Sales module manages customer demand.
+
+Features
+
+      Create Sales Orders
+      Select customer
+      Add products
+      Check stock availability
+      Deliver products
+      Trigger procurement
+      Update inventory
+
+Sales Workflow
+
+Draft  Confirmed  Partially Delivered  Fully Delivered
+OR
+Draft  Cancelled
+
+Sales Business Logic
+
+When Sales Order is confirmed:
+      Product availability is checked.
+      Quantity becomes reserved.
+      Procurement may trigger automatically.
+
+When delivered:
+      Stock decreases.
+
+Purchase Module
+ The Purchase module replenishes stock.
+
+Features
+
+       Create Purchase Orders
+       Vendor management
+       Receive products
+       Increase stock automatically
+
+Purchase Workflow
+
+ Draft  Confirmed  Partially Received  Fully Received
+
+Purchase Business Logic
+
+ When products are received:
+       On Hand Quantity increases.
+       Stock Ledger updates automatically.
+
+Manufacturing Module
+
+ Manufacturing converts raw materials into finished goods.
+Understanding Manufacturing
+
+To manufacture products, businesses need:
+
+      Components
+      Operations
+      Work Centers
+      Work Orders
+      BoM
+
+Bill of Materials (BoM)
+
+A BoM defines:
+
+      Components needed
+      Quantity needed
+      Operations required
+
+Example BoM
+
+Product
+
+Wooden Table
+
+Components
+
+             Component                         Qty
+
+Wooden Legs                                4
+
+Wooden Top                                 1
+
+Screws                                     12
+Operations
+
+            Operation                                  Duration
+
+Assembly                                      60 mins
+Painting                                      30 mins
+Packing                                       20 mins
+
+Manufacturing Order (MO)
+
+An MO is created to manufacture products.
+
+MO Includes
+
+     Finished Product
+     Quantity
+     Components
+     Work Orders
+     Assignee
+     BoM
+
+Work Orders
+
+Work Orders are individual production steps.
+Example:
+
+     Assembly
+     Painting
+     Packing
+
+Work Centers
+Physical locations where operations happen.
+
+Examples:
+
+      Assembly Line
+      Paint Floor
+      Packaging Unit
+
+Manufacturing Flow
+
+Step 1
+
+Create Manufacturing Order.
+
+Step 2
+
+System fetches:
+      Components
+      Operations
+      Durations
+
+from BoM.
+
+Step 3
+
+Components become reserved.
+
+Step 4
+
+Operators execute Work Orders.
+
+Step 5
+
+Finished goods added to stock.
+
+Step 6
+
+Consumed components deducted from stock.
+
+Stock Ledger Concept
+
+Stock Ledger tracks every inventory movement.
+Example ­ Manufacturing 10 Tables
+
+ Inventory Movement Summary
+
+        Product                                       Movement
+                                                           -40
+Legs                                                       -10
+Tops                                                      -120
+Screws                                                    +10
+Tables
+
+Audit Logs
+
+  Every important change must be tracked.
+
+  Examples:
+
+        Status changes
+        Quantity changes
+        Price updates
+        Deliveries
+        Manufacturing completion
+
+Dashboard Requirements
+
+  The ERP should provide a real-time dashboard with:
+
+        Total Sales Orders
+        Pending Deliveries
+        Manufacturing Orders
+        Delayed Orders
+        Total Purchase Orders
+        Partial Receipts
+Final Objective
+
+ Build a modular Mini ERP platform capable of:
+
+       Managing inventory
+       Processing sales & purchases
+       Manufacturing finished goods
+       Automating procurement
+       Supporting MTS & MTO flows
+       Maintaining stock traceability
+       Tracking audit logs
+       Providing operational visibility
+
+ You're not just building an ERP--you are building the digital backbone of a growing business.
+ Every order, purchase, manufacturing task, and inventory movement must work together as one
+ connected system.
+
+ The best solutions won't just manage data--they will orchestrate an entire business.
+
+ Now it's your turn to make an IMPACT.
+
+ Code smart. Build big. Have fun.
+
+Mockup Link -
+https://link.excalidraw.com/l/65VNwvy7c4X/gt2p7234Do
+
