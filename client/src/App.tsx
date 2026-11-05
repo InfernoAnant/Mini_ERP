@@ -5,6 +5,8 @@ import { Spinner } from './components/ui';
 import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import ProductFormPage from './pages/products/ProductFormPage';
+import ProductListPage from './pages/products/ProductListPage';
 import ProfilePage from './pages/profile/ProfilePage';
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -33,6 +35,8 @@ export default function App() {
       >
         <Route index element={<Home />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="products" element={<ProductListPage />} />
+        <Route path="products/:id" element={<ProductFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
