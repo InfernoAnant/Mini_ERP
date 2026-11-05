@@ -9,6 +9,7 @@ import manufacturingRoutes from './routes/manufacturing';
 import productRoutes from './routes/products';
 import purchaseRoutes from './routes/purchase';
 import salesRoutes from './routes/sales';
+import userRoutes from './routes/users';
 // Installs MTO procurement into manufacturing confirmation (see setComponentProcurer).
 import './services/procurement.service';
 
@@ -29,6 +30,7 @@ export function createApp(): Express {
   app.use('/api/purchase', purchaseRoutes);
   app.use('/api/manufacturing', manufacturingRoutes);
   app.use('/api/sales', salesRoutes);
+  app.use('/api/users', userRoutes);
   app.use('/api/contacts', contactsRouter);
   app.use('/api/work-centers', workCentersRouter);
 
