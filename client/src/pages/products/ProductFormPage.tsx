@@ -1,7 +1,7 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { Contact, LedgerRow, OperationDTO, Paged, ProductDTO } from '../../api/types';
 import LogsButton from '../../components/LogsButton';
 import { dateTime, ErrorBanner, Field, label, Modal, Notice, PageHeader, qty, Spinner } from '../../components/ui';
@@ -48,8 +48,7 @@ export default function ProductFormPage() {
   const [adjustOpen, setAdjustOpen] = useState(false);
   const action = useAction();
 
-  useEffect(() => {
-    const p = product.data;
+  useOnChange(product.data, (p) => {
     if (!p) return;
     setForm({
       name: p.name,
@@ -62,7 +61,7 @@ export default function ProductFormPage() {
       vendorId: p.vendor ? String(p.vendor.id) : '',
       defaultBomId: p.defaultBom ? String(p.defaultBom.id) : '',
     });
-  }, [product.data]);
+  });
 
   if (!isNew && !product.data) return product.error ? <ErrorBanner message={product.error} /> : <Spinner />;
   const p = product.data;

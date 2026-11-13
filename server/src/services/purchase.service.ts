@@ -4,7 +4,7 @@ import { assertCan, assertCanEdit } from '../config/permissions.js';
 import { ZERO } from '../lib/decimal.js';
 import { AppError, notFound } from '../lib/errors.js';
 import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { type Db, type Tx, prisma, transaction, sequential } from '../lib/prisma.js';
 import { userRefs } from '../lib/users.js';
 import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service.js';
 import type { AuthUser } from './auth.service.js';
@@ -40,11 +40,11 @@ function base(user: AuthUser | null, po: { id: number; reference: string }): Aud
 }
 
 async function toDto(db: Db, po: PoRow) {
-  const [pending, ref, operations] = await Promise.all([
-    pendingQtyByLine(db, 'purchase', po.id),
-    userRefs(db, [po.responsibleId, po.createdById]),
-    operationsForOrder(db, { purchaseOrderId: po.id }),
-  ]);
+  const [pending, ref, operations] = await sequential(
+    () => pendingQtyByLine(db, 'purchase', po.id),
+    () => userRefs(db, [po.responsibleId, po.createdById]),
+    () => operationsForOrder(db, { purchaseOrderId: po.id }),
+  );
   const lines = po.lines.map((l) => ({
     id: l.id,
     productId: l.productId,

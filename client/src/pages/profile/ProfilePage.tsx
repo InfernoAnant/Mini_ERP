@@ -1,6 +1,6 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { UserDTO } from '../../api/types';
 import { ErrorBanner, Field, Notice, PageHeader, Spinner } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
@@ -12,9 +12,9 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const action = useAction();
 
-  useEffect(() => {
-    if (data) setForm({ name: data.name, address: data.address ?? '', mobile: data.mobile ?? '', photoUrl: data.photoUrl ?? '' });
-  }, [data]);
+  useOnChange(data, (d) => {
+    if (d) setForm({ name: d.name, address: d.address ?? '', mobile: d.mobile ?? '', photoUrl: d.photoUrl ?? '' });
+  });
 
   if (!data) return error ? <ErrorBanner message={error} /> : <Spinner />;
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });

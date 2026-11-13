@@ -1,7 +1,7 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { Contact, Module, OperationDTO, OperationType, ProductOption, Progress, Ref } from '../../api/types';
 import JourneyPanel from '../../components/JourneyPanel';
 import LevelBar, { useCelebration } from '../../components/LevelBar';
@@ -85,7 +85,13 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const partners = useLoad(() => api.get<Contact[]>('/contacts', { type: config.partnerType }), []);
   const products = useLoad(() => api.get<ProductOption[]>('/products/options'), []);
   const people = useLoad(() => api.get<Ref[]>('/users/options'), []);
-  const [header, setHeader] = useState<HeaderForm>({ partnerId: '', address: '', personId: '', date: '' });
+  // New orders default the salesperson/responsible to the current user.
+  const [header, setHeader] = useState<HeaderForm>(() => ({
+    partnerId: '',
+    address: '',
+    personId: isNew && user ? String(user.id) : '',
+    date: '',
+  }));
   const [lines, setLines] = useState<EditableLine[]>([
     { key: newLineKey(), productId: '', quantity: '1', price: '0', done: 0, pending: 0 },
   ]);
@@ -105,12 +111,9 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
     });
     setLines(linesFromView(view));
   };
-  useEffect(() => {
-    if (v) resetForm(v);
-  }, [v]);
-  useEffect(() => {
-    if (isNew && user) setHeader((h) => ({ ...h, personId: h.personId || String(user.id) }));
-  }, [isNew, user]);
+  useOnChange(v, (view) => {
+    if (view) resetForm(view);
+  });
 
   const isDraft = v?.status === 'DRAFT';
   const isOpen = !!v && config.openStatuses.includes(v.status);

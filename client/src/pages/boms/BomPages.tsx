@@ -1,7 +1,7 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { BomDTO, ProductOption, WorkCenter } from '../../api/types';
 import ListPage from '../../components/ListPage';
 import LogsButton from '../../components/LogsButton';
@@ -48,8 +48,7 @@ export function BomFormPage() {
   const action = useAction();
   const editable = isNew ? can('BOM', 'create') : can('BOM', 'edit');
 
-  useEffect(() => {
-    const b = bom.data;
+  useOnChange(bom.data, (b) => {
     if (!b) return;
     setProductId(String(b.product.id));
     setOutputQty(String(b.outputQty));
@@ -62,7 +61,7 @@ export function BomFormPage() {
         durationMinutes: String(o.durationMinutes),
       })),
     );
-  }, [bom.data]);
+  });
 
   if (!isNew && !bom.data) return bom.error ? <ErrorBanner message={bom.error} /> : <Spinner />;
 

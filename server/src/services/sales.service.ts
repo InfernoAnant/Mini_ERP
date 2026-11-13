@@ -4,7 +4,7 @@ import { assertCan, assertCanEdit } from '../config/permissions.js';
 import { ZERO } from '../lib/decimal.js';
 import { AppError, notFound } from '../lib/errors.js';
 import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { type Db, type Tx, prisma, transaction, sequential } from '../lib/prisma.js';
 import { userRefs } from '../lib/users.js';
 import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service.js';
 import type { AuthUser } from './auth.service.js';
@@ -44,18 +44,20 @@ function base(user: AuthUser | null, so: { id: number; reference: string }): Aud
 }
 
 async function procurementsFor(db: Db, reference: string) {
-  const [pos, mos] = await Promise.all([
-    db.purchaseOrder.findMany({
-      where: { origin: reference },
-      select: { id: true, reference: true, status: true },
-      orderBy: { id: 'asc' },
-    }),
-    db.manufacturingOrder.findMany({
-      where: { origin: reference },
-      select: { id: true, reference: true, status: true },
-      orderBy: { id: 'asc' },
-    }),
-  ]);
+  const [pos, mos] = await sequential(
+    () =>
+      db.purchaseOrder.findMany({
+        where: { origin: reference },
+        select: { id: true, reference: true, status: true },
+        orderBy: { id: 'asc' },
+      }),
+    () =>
+      db.manufacturingOrder.findMany({
+        where: { origin: reference },
+        select: { id: true, reference: true, status: true },
+        orderBy: { id: 'asc' },
+      }),
+  );
   return [
     ...pos.map((p) => ({ id: p.id, reference: p.reference, type: 'PO' as const, status: p.status as string })),
     ...mos.map((m) => ({ id: m.id, reference: m.reference, type: 'MO' as const, status: m.status as string })),
@@ -63,16 +65,17 @@ async function procurementsFor(db: Db, reference: string) {
 }
 
 async function toDto(db: Db, so: SoRow) {
-  const [pending, levels, ref, procurements, operations] = await Promise.all([
-    pendingQtyByLine(db, 'sales', so.id),
-    getLevels(
-      db,
-      so.lines.map((l) => l.productId),
-    ),
-    userRefs(db, [so.salespersonId, so.createdById]),
-    procurementsFor(db, so.reference),
-    operationsForOrder(db, { salesOrderId: so.id }),
-  ]);
+  const [pending, levels, ref, procurements, operations] = await sequential(
+    () => pendingQtyByLine(db, 'sales', so.id),
+    () =>
+      getLevels(
+        db,
+        so.lines.map((l) => l.productId),
+      ),
+    () => userRefs(db, [so.salespersonId, so.createdById]),
+    () => procurementsFor(db, so.reference),
+    () => operationsForOrder(db, { salesOrderId: so.id }),
+  );
   const reserving = SO_OPEN.includes(so.status);
   const lines = so.lines.map((l) => {
     const remaining = l.quantity.minus(l.deliveredQty);

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { MoDTO, OperationDTO, ProductOption, Ref } from '../../api/types';
 import JourneyPanel from '../../components/JourneyPanel';
 import LevelBar, { useCelebration } from '../../components/LevelBar';
@@ -91,17 +91,16 @@ export function MoFormPage() {
       assigneeId: d.assignee ? String(d.assignee.id) : '',
       deadline: dateInput(d.deadline),
     });
-  useEffect(() => {
-    if (m) resetForm(m);
-  }, [m]);
-  useEffect(() => {
-    // Default to the product's own BoM when choosing a product on a draft.
-    if (!boms.data || (form.bomId && boms.data.some((b) => String(b.id) === form.bomId))) return;
+  useOnChange(m, (d) => {
+    if (d) resetForm(d);
+  });
+  // Default to the product's own BoM when the product's BoM list arrives (drafts).
+  useOnChange(boms.data, (list) => {
+    if (!list || (form.bomId && list.some((b) => String(b.id) === form.bomId))) return;
     const product = products.data?.find((p) => String(p.id) === form.productId);
-    const preferred = boms.data.find((b) => b.id === product?.defaultBomId) ?? boms.data[0];
+    const preferred = list.find((b) => b.id === product?.defaultBomId) ?? list[0];
     setForm((f) => ({ ...f, bomId: preferred ? String(preferred.id) : '' }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boms.data]);
+  });
 
   if (!isNew && !m) return mo.error ? <ErrorBanner message={mo.error} /> : <Spinner />;
 

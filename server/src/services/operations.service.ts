@@ -4,7 +4,7 @@ import { can, canConfirmOperation, canPlaceOperation, operationModule } from '..
 import { dec, ZERO } from '../lib/decimal.js';
 import { AppError, notFound } from '../lib/errors.js';
 import { paging } from '../lib/listQuery.js';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { type Db, type Tx, prisma, transaction, sequential } from '../lib/prisma.js';
 import { userRefs } from '../lib/users.js';
 import { type AuditBase, logAudit, logStatus } from './audit.service.js';
 import type { AuthUser } from './auth.service.js';
@@ -47,16 +47,21 @@ async function toDtos(db: Db, ops: OpRow[]) {
   const ids = (key: 'salesOrderId' | 'purchaseOrderId' | 'manufacturingOrderId' | 'productId') => [
     ...new Set(ops.map((o) => o[key]).filter((v): v is number => v !== null)),
   ];
-  const [sos, pos, mos, products, ref] = await Promise.all([
-    db.salesOrder.findMany({ where: { id: { in: ids('salesOrderId') } }, select: { id: true, reference: true } }),
-    db.purchaseOrder.findMany({ where: { id: { in: ids('purchaseOrderId') } }, select: { id: true, reference: true } }),
-    db.manufacturingOrder.findMany({ where: { id: { in: ids('manufacturingOrderId') } }, select: { id: true, reference: true } }),
-    db.product.findMany({ where: { id: { in: ids('productId') } }, select: { id: true, name: true, onHand: true } }),
-    userRefs(
-      db,
-      ops.flatMap((o) => [o.placedById, o.decidedById]),
-    ),
-  ]);
+  const [sos, pos, mos, products, ref] = await sequential(
+    () => db.salesOrder.findMany({ where: { id: { in: ids('salesOrderId') } }, select: { id: true, reference: true } }),
+    () => db.purchaseOrder.findMany({ where: { id: { in: ids('purchaseOrderId') } }, select: { id: true, reference: true } }),
+    () =>
+      db.manufacturingOrder.findMany({
+        where: { id: { in: ids('manufacturingOrderId') } },
+        select: { id: true, reference: true },
+      }),
+    () => db.product.findMany({ where: { id: { in: ids('productId') } }, select: { id: true, name: true, onHand: true } }),
+    () =>
+      userRefs(
+        db,
+        ops.flatMap((o) => [o.placedById, o.decidedById]),
+      ),
+  );
   const refOf = (list: { id: number; reference: string }[], id: number | null) => list.find((x) => x.id === id)?.reference ?? '';
   return ops.map((o) => {
     const product = products.find((p) => p.id === o.productId);

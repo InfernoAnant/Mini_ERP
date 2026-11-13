@@ -1,7 +1,7 @@
-import { type FormEvent, useEffect, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import { useAction, useLoad } from '../../api/hooks';
+import { useAction, useLoad, useOnChange } from '../../api/hooks';
 import type { AccessLevel, Module, Paged, UserDTO } from '../../api/types';
 import { ErrorBanner, Field, label, Notice, PageHeader, Spinner } from '../../components/ui';
 
@@ -77,7 +77,7 @@ export function UserFormPage() {
   const action = useAction();
   const u = user.data;
 
-  useEffect(() => {
+  useOnChange(u, (u) => {
     if (!u) return;
     setProfile({
       name: u.name,
@@ -87,7 +87,7 @@ export function UserFormPage() {
       readOnly: u.readOnly,
     });
     setAccess(u.access);
-  }, [u]);
+  });
 
   if (!u || !access) return user.error ? <ErrorBanner message={user.error} /> : <Spinner />;
   const locked = u.isDemoLocked;

@@ -71,8 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setUnauthorizedHandler(() => setUser(null));
-    void refresh();
-  }, [refresh]);
+    api
+      .get<{ user: AuthUser }>('/auth/me')
+      .then((res) => setUser(res.user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, []);
 
   const value = useMemo<AuthState>(
     () => ({

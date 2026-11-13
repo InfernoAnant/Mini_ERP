@@ -225,7 +225,9 @@ describe('stock operations: place, then confirm', () => {
 
   it('PRODUCTS USER cannot place adjustment → 403', async () => {
     const product = await makeProduct({ onHand: 1 });
-    const res = await (await as({ PRODUCTS: 'USER' }))
+    const res = await (
+      await as({ PRODUCTS: 'USER' })
+    )
       .post('/api/operations')
       .send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 5, reason: 'Count' });
     expect(res.status).toBe(403);

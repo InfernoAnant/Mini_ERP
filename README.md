@@ -1,13 +1,15 @@
 # Shiv Furniture ERP — Mini ERP from demand to delivery
 
 [![CI](https://github.com/InfernoAnant/Mini_ERP/actions/workflows/ci.yml/badge.svg)](https://github.com/InfernoAnant/Mini_ERP/actions/workflows/ci.yml)
-![Node 22](https://img.shields.io/badge/node-22-339933?logo=node.js&logoColor=white)
+![Node 24](https://img.shields.io/badge/node-24%20LTS-339933?logo=node.js&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Prisma 7](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-131%20API%20%2B%204%20e2e-brightgreen)
 
 A full-stack mini ERP for a furniture manufacturer. It covers products, sales, purchasing, bills of materials, manufacturing with work orders, a stock ledger, make-to-order auto-procurement, a two-step stock-operation workflow, role-based access, a complete audit trail and game-style "level-up" order progress.
 
-Built with **React + TypeScript**, **Node.js / Express**, **PostgreSQL / Prisma**. It has 131 API tests, Playwright end-to-end tests of the full business flow, and CI on every pull request and push to `main`.
+Built with **React 19 + TypeScript 7**, **Node.js 24 / Express 5**, **PostgreSQL / Prisma 7**, **Tailwind CSS 4** and **Vite 8**. It has 131 API tests, Playwright end-to-end tests of the full business flow, and CI on every pull request and push to `main`.
 
 > **Live demo:** _link added after deployment_. Everyone shares the demo, so click **Reset demo data** on the login page first.
 
@@ -110,7 +112,7 @@ e2e/           Playwright: the full demand-to-delivery flow, role checks, README
 
 ## Development
 
-Requirements: **Node 22** (`.nvmrc`; `nvm use`) and PostgreSQL 16+ with two empty databases, `minierp_dev` and `minierp_test`. Or just use Docker, as above.
+Requirements: **Node 24 LTS** (`.nvmrc`; `nvm use`) and PostgreSQL 16+ with two empty databases, `minierp_dev` and `minierp_test`. Or just use Docker, as above.
 
 ```bash
 npm install                    # root tooling: ESLint, Prettier, Husky, Playwright
@@ -135,11 +137,11 @@ cd client && npm install && npm run dev   # http://localhost:5173 (proxies /api 
 
 A Husky pre-commit hook runs ESLint and Prettier on staged files. CI (GitHub Actions) runs lint, typecheck, server tests, the client build, Playwright and a Docker Compose smoke test on every pull request and every push to `main`.
 
-> On Windows with Node 24, Vitest's worker occasionally aborts natively while Prisma is active. `server/npm test` re-runs **only** in that case and says so; real failures are never retried. CI uses Node 22.
+> On Windows, Vitest's forked worker occasionally aborts natively (exit `0xC0000409`) — a Node/Windows issue, not the app. `server/npm test` re-runs **only** in that case and says so; real failures are never retried. CI runs on Linux.
 
 ## Deployment
 
-- **API:** Render (`render.yaml`, Node 22), running `prisma migrate deploy` on start. Set `AUTO_SEED=true` to load the demo into an empty database.
+- **API:** Render (`render.yaml`, Node 24), running `prisma migrate deploy` on start. Set `AUTO_SEED=true` to load the demo into an empty database.
 - **Database:** Neon PostgreSQL.
 - **Web:** Vercel (`vercel.json`). `/api/*` is rewritten to the API, so the auth cookie stays first-party (`SameSite=Lax`, `Secure`).
 

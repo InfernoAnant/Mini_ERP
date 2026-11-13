@@ -1,12 +1,7 @@
 import { type APIRequestContext, expect, type Page } from '@playwright/test';
 
 export type DemoRole =
-  | 'System Admin'
-  | 'Sales Manager'
-  | 'Purchase Manager'
-  | 'Production Head'
-  | 'Inventory Manager'
-  | 'Business Owner';
+  'System Admin' | 'Sales Manager' | 'Purchase Manager' | 'Production Head' | 'Inventory Manager' | 'Business Owner';
 
 /** Restore the seeded demo. The API allows one reset per 15 s, so wait once and retry on 429. */
 export async function resetDemo(request: APIRequestContext): Promise<void> {

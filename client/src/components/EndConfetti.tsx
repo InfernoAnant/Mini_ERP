@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#06b6d4', '#facc15'];
 const W = 160;
@@ -15,9 +15,8 @@ export default function EndConfetti({ onDone }: { onDone: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const anchorRef = useRef<HTMLSpanElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0, ready: false });
-  // Keep the latest callback without restarting the animation when the parent re-renders.
-  const onDoneRef = useRef(onDone);
-  onDoneRef.current = onDone;
+  // Latest callback without restarting the animation when the parent re-renders.
+  const finish = useEffectEvent(() => onDone());
   const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   // Centre the burst on the bar's right end (viewport coordinates).
@@ -28,7 +27,7 @@ export default function EndConfetti({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     if (reduced) {
-      const t = window.setTimeout(() => onDoneRef.current(), DURATION);
+      const t = window.setTimeout(() => finish(), DURATION);
       return () => window.clearTimeout(t);
     }
     const canvas = canvasRef.current;
@@ -75,11 +74,11 @@ export default function EndConfetti({ onDone }: { onDone: () => void }) {
         ctx.restore();
       }
       if (t < DURATION) frame = requestAnimationFrame(tick);
-      else onDoneRef.current();
+      else finish();
     };
     frame = requestAnimationFrame(tick);
     // Animation frames pause in background tabs; always clean up anyway.
-    const fallback = window.setTimeout(() => onDoneRef.current(), DURATION + 500);
+    const fallback = window.setTimeout(() => finish(), DURATION + 500);
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(fallback);
