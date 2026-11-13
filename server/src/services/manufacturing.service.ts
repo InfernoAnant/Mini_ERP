@@ -150,6 +150,11 @@ export async function createDraftMoTx(tx: Tx, user: AuthUser, input: MoInput & {
   return mo;
 }
 
+/** DTO without a permission check (journey, internal use). */
+export async function moDtoById(id: number, db: Db = prisma): Promise<MoDTO> {
+  return toDto(db, await load(db, id));
+}
+
 export async function getMo(user: AuthUser, id: number, db: Db = prisma): Promise<MoDTO> {
   assertCan(user, 'MANUFACTURING', 'view');
   return toDto(db, await load(db, id));

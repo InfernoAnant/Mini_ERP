@@ -24,3 +24,8 @@ export function serialize(value: unknown): unknown {
   }
   return value;
 }
+
+/** Plain number text for titles: 8, 2.5 (no trailing zeros). */
+export function qtyText(v: Prisma.Decimal | number): string {
+  return new Prisma.Decimal(v).toDecimalPlaces(3).toString();
+}

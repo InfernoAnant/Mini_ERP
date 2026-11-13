@@ -132,6 +132,11 @@ export async function createDraftPurchaseTx(
   return po;
 }
 
+/** DTO without a permission check (journey, internal use). */
+export async function purchaseDtoById(id: number, db: Db = prisma): Promise<PurchaseDTO> {
+  return toDto(db, await load(db, id));
+}
+
 export async function getPurchase(user: AuthUser, id: number, db: Db = prisma): Promise<PurchaseDTO> {
   assertCan(user, 'PURCHASE', 'view');
   return toDto(db, await load(db, id));

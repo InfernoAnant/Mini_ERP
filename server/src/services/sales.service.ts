@@ -134,6 +134,11 @@ async function priceOf(db: Db, productIds: number[]): Promise<Map<number, Prisma
   return new Map(rows.map((r) => [r.id, r.salesPrice]));
 }
 
+/** DTO without a permission check (journey, internal use). */
+export async function salesDtoById(id: number, db: Db = prisma): Promise<SalesDTO> {
+  return toDto(db, await load(db, id));
+}
+
 export async function getSales(user: AuthUser, id: number, db: Db = prisma): Promise<SalesDTO> {
   assertCan(user, 'SALES', 'view');
   return toDto(db, await load(db, id));
