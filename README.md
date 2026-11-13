@@ -3,11 +3,11 @@
 [![CI](https://github.com/InfernoAnant/Mini_ERP/actions/workflows/ci.yml/badge.svg)](https://github.com/InfernoAnant/Mini_ERP/actions/workflows/ci.yml)
 ![Node 22](https://img.shields.io/badge/node-22-339933?logo=node.js&logoColor=white)
 ![TypeScript strict](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-127%20API%20%2B%204%20e2e-brightgreen)
+![Tests](https://img.shields.io/badge/tests-131%20API%20%2B%204%20e2e-brightgreen)
 
 A full-stack mini ERP for a furniture manufacturer. It covers products, sales, purchasing, bills of materials, manufacturing with work orders, a stock ledger, make-to-order auto-procurement, a two-step stock-operation workflow, role-based access, a complete audit trail and game-style "level-up" order progress.
 
-Built with **React + TypeScript**, **Node.js / Express**, **PostgreSQL / Prisma**. It has 127 API tests, Playwright end-to-end tests of the full business flow, and CI on every push.
+Built with **React + TypeScript**, **Node.js / Express**, **PostgreSQL / Prisma**. It has 131 API tests, Playwright end-to-end tests of the full business flow, and CI on every pull request and push to `main`.
 
 > **Live demo:** _link added after deployment_. Everyone shares the demo, so click **Reset demo data** on the login page first.
 
@@ -24,6 +24,8 @@ docker compose up --build
 ```
 
 Then open **http://localhost:8080** and click any demo account. Postgres, the API and the web app start together, and the demo data loads automatically on first start.
+
+> ⚠️ This stack is a **demo**: anyone can reset the data or log in as a demo account without a password, and the JWT secret is a placeholder. Don't expose it to the internet as-is.
 
 **Without Docker:** see [Development](#development).
 
@@ -128,10 +130,10 @@ cd client && npm install && npm run dev   # http://localhost:5173 (proxies /api 
 | `npm run lint`              | ESLint (TypeScript + React hooks rules) across server, client and e2e |
 | `npm run format` / `:check` | Prettier                                                              |
 | `npm run typecheck`         | `tsc` for server and client                                           |
-| `npm test`                  | 127 server tests (Vitest, real Postgres)                              |
+| `npm test`                  | 131 server tests (Vitest, real Postgres)                              |
 | `npm run test:e2e`          | Playwright: the full business flow in a real browser                  |
 
-A Husky pre-commit hook runs ESLint and Prettier on staged files. CI (GitHub Actions) runs lint, typecheck, server tests, the client build, Playwright and a Docker Compose smoke test on every push and pull request.
+A Husky pre-commit hook runs ESLint and Prettier on staged files. CI (GitHub Actions) runs lint, typecheck, server tests, the client build, Playwright and a Docker Compose smoke test on every pull request and every push to `main`.
 
 > On Windows with Node 24, Vitest's worker occasionally aborts natively while Prisma is active. `server/npm test` re-runs **only** in that case and says so; real failures are never retried. CI uses Node 22.
 

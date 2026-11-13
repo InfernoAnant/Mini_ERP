@@ -17,11 +17,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
-# prisma CLI is needed at start for `migrate deploy`
-RUN npm ci --omit=dev && npm install --no-save prisma@6.19.0 && npm cache clean --force
+# `prisma` is a runtime dependency (needed for `migrate deploy` at start)
+RUN npm ci --omit=dev && npm cache clean --force
 COPY prisma ./prisma
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 5000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/index.js"]
+# Local CLI only (never fetch another version); `exec` makes node PID 1 so SIGTERM reaches it
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && exec node dist/src/index.js"]

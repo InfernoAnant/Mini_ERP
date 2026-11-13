@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { agentFor, app, makeUser, resetDb } from './helpers';
 
 const valid = { loginId: 'newuser1', email: 'new@test.local', password: 'Strong@123', name: 'New User' };
@@ -94,5 +94,24 @@ describe('auth', () => {
       BOM: 'ADMIN',
       PRODUCTS: 'ADMIN',
     });
+  });
+});
+
+describe('auth cookie Secure flag', () => {
+  beforeEach(resetDb);
+  afterEach(() => {
+    delete process.env.COOKIE_SECURE;
+  });
+
+  it.each([
+    ['TRUE', true],
+    ['1', true],
+    ['true', true],
+    ['false', false],
+  ])('COOKIE_SECURE=%s → Secure %s (only an explicit "false" turns it off)', async (value, secure) => {
+    process.env.COOKIE_SECURE = value;
+    const user = await makeUser();
+    const res = await request(app()).post('/api/auth/login').send({ loginId: user.loginId, password: 'Test@1234' });
+    expect(/;\s*Secure/i.test(String(res.headers['set-cookie']))).toBe(secure);
   });
 });
