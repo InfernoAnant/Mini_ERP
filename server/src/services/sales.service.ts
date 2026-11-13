@@ -45,8 +45,16 @@ function base(user: AuthUser | null, so: { id: number; reference: string }): Aud
 
 async function procurementsFor(db: Db, reference: string) {
   const [pos, mos] = await Promise.all([
-    db.purchaseOrder.findMany({ where: { origin: reference }, select: { id: true, reference: true, status: true }, orderBy: { id: 'asc' } }),
-    db.manufacturingOrder.findMany({ where: { origin: reference }, select: { id: true, reference: true, status: true }, orderBy: { id: 'asc' } }),
+    db.purchaseOrder.findMany({
+      where: { origin: reference },
+      select: { id: true, reference: true, status: true },
+      orderBy: { id: 'asc' },
+    }),
+    db.manufacturingOrder.findMany({
+      where: { origin: reference },
+      select: { id: true, reference: true, status: true },
+      orderBy: { id: 'asc' },
+    }),
   ]);
   return [
     ...pos.map((p) => ({ id: p.id, reference: p.reference, type: 'PO' as const, status: p.status as string })),
@@ -57,7 +65,10 @@ async function procurementsFor(db: Db, reference: string) {
 async function toDto(db: Db, so: SoRow) {
   const [pending, levels, ref, procurements, operations] = await Promise.all([
     pendingQtyByLine(db, 'sales', so.id),
-    getLevels(db, so.lines.map((l) => l.productId)),
+    getLevels(
+      db,
+      so.lines.map((l) => l.productId),
+    ),
     userRefs(db, [so.salespersonId, so.createdById]),
     procurementsFor(db, so.reference),
     operationsForOrder(db, { salesOrderId: so.id }),
@@ -147,7 +158,10 @@ export async function getSales(user: AuthUser, id: number, db: Db = prisma): Pro
 /** Creates a Draft SO (no permission check; used by createSales and seeding). */
 export async function createDraftSalesTx(tx: Tx, user: AuthUser, input: SalesInput): Promise<{ id: number; reference: string }> {
   await validateRefs(tx, input);
-  const prices = await priceOf(tx, input.lines.map((l) => l.productId));
+  const prices = await priceOf(
+    tx,
+    input.lines.map((l) => l.productId),
+  );
   const reference = await nextRef(tx, 'SO');
   const so = await tx.salesOrder.create({
     data: {
@@ -178,7 +192,11 @@ export async function createSales(user: AuthUser, input: SalesInput): Promise<Sa
   });
 }
 
-export async function updateSales(user: AuthUser, id: number, input: SalesInput): Promise<{ order: SalesDTO; procured: string[] }> {
+export async function updateSales(
+  user: AuthUser,
+  id: number,
+  input: SalesInput,
+): Promise<{ order: SalesDTO; procured: string[] }> {
   return transaction(async (tx) => {
     await lock(tx, id);
     const before = await load(tx, id);
@@ -198,7 +216,10 @@ export async function updateSales(user: AuthUser, id: number, input: SalesInput)
     const increasedIds = plan.increases.map((i) => i.productId);
     if (open) await lockProducts(tx, increasedIds);
     const levelsBefore = open && increasedIds.length ? await getLevels(tx, increasedIds) : null;
-    const prices = await priceOf(tx, input.lines.map((l) => l.productId));
+    const prices = await priceOf(
+      tx,
+      input.lines.map((l) => l.productId),
+    );
     if (plan.deletes.length) await tx.salesOrderLine.deleteMany({ where: { id: { in: plan.deletes } } });
     for (const u of plan.updates) {
       await tx.salesOrderLine.update({
@@ -227,7 +248,8 @@ export async function updateSales(user: AuthUser, id: number, input: SalesInput)
       include,
     });
     await logChanges(tx, base(user, before), before, after, HEADER_FIELDS);
-    const summary = (rows: SoRow['lines']) => rows.map((l) => `${l.quantity.toString()} × ${l.product.name} @ ${l.unitPrice.toString()}`).join(', ');
+    const summary = (rows: SoRow['lines']) =>
+      rows.map((l) => `${l.quantity.toString()} × ${l.product.name} @ ${l.unitPrice.toString()}`).join(', ');
     await logChanges(tx, base(user, before), { lines: summary(before.lines) }, { lines: summary(after.lines) }, ['lines']);
     let procured: string[] = [];
     if (open) {
@@ -246,7 +268,11 @@ export async function updateSales(user: AuthUser, id: number, input: SalesInput)
           tx,
           user,
           before.reference,
-          plan.increases.map((i) => ({ productId: i.productId, quantity: i.quantity, freeBefore: levelsBefore.get(i.productId)?.free ?? ZERO })),
+          plan.increases.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            freeBefore: levelsBefore.get(i.productId)?.free ?? ZERO,
+          })),
         );
       }
     }

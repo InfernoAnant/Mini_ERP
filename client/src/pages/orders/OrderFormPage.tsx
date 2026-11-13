@@ -24,7 +24,17 @@ export type OrderView = {
   createdById: number;
   late: boolean;
   origin?: string | null;
-  lines: { id: number; productId: number; productName: string; quantity: number; done: number; pending: number; price: number; available?: boolean; freeToUse?: number }[];
+  lines: {
+    id: number;
+    productId: number;
+    productName: string;
+    quantity: number;
+    done: number;
+    pending: number;
+    price: number;
+    available?: boolean;
+    freeToUse?: number;
+  }[];
   operations: OperationDTO[];
   progress: Progress;
   procurements?: { id: number; reference: string; type: 'PO' | 'MO'; status: string }[];
@@ -76,7 +86,9 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const products = useLoad(() => api.get<ProductOption[]>('/products/options'), []);
   const people = useLoad(() => api.get<Ref[]>('/users/options'), []);
   const [header, setHeader] = useState<HeaderForm>({ partnerId: '', address: '', personId: '', date: '' });
-  const [lines, setLines] = useState<EditableLine[]>([{ key: newLineKey(), productId: '', quantity: '1', price: '0', done: 0, pending: 0 }]);
+  const [lines, setLines] = useState<EditableLine[]>([
+    { key: newLineKey(), productId: '', quantity: '1', price: '0', done: 0, pending: 0 },
+  ]);
   const [editing, setEditing] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [opOpen, setOpOpen] = useState(false);
@@ -85,7 +97,12 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const party = useCelebration(v?.progress, `${v?.id ?? ''}`);
 
   const resetForm = (view: OrderView) => {
-    setHeader({ partnerId: String(view.partner.id), address: view.address ?? '', personId: view.person ? String(view.person.id) : '', date: dateInput(view.date) });
+    setHeader({
+      partnerId: String(view.partner.id),
+      address: view.address ?? '',
+      personId: view.person ? String(view.person.id) : '',
+      date: dateInput(view.date),
+    });
     setLines(linesFromView(view));
   };
   useEffect(() => {
@@ -98,7 +115,9 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const isDraft = v?.status === 'DRAFT';
   const isOpen = !!v && config.openStatuses.includes(v.status);
   const ownDraft = !!v && isDraft && v.createdById === user?.id;
-  const mayEdit = isNew ? can(config.module, 'create') : can(config.module, 'edit') && (user?.access[config.module] === 'ADMIN' || user?.isSystemAdmin || ownDraft);
+  const mayEdit = isNew
+    ? can(config.module, 'create')
+    : can(config.module, 'edit') && (user?.access[config.module] === 'ADMIN' || user?.isSystemAdmin || ownDraft);
   const formEditable = isNew || (mayEdit && (isDraft || (isOpen && editing)));
   const remainingTotal = useMemo(() => (v ? v.lines.reduce((s, l) => s + (l.quantity - l.done - l.pending), 0) : 0), [v]);
 
@@ -108,7 +127,8 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
     order.setData(view);
     setEditing(false);
   };
-  const procuredNotice = (verb: string, refs: string[]) => setNotice(refs.length ? `${verb}. Auto-created: ${refs.join(', ')}` : `${verb}.`);
+  const procuredNotice = (verb: string, refs: string[]) =>
+    setNotice(refs.length ? `${verb}. Auto-created: ${refs.join(', ')}` : `${verb}.`);
 
   const save = async (e?: FormEvent) => {
     e?.preventDefault();
@@ -225,12 +245,19 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
       {notice && <Notice tone="success">{notice}</Notice>}
       {isOpen && editing && (
         <Notice tone="warn">
-          Editing a confirmed order: quantities can't go below what's already {config.doneLabel.toLowerCase()} or pending. Raising a quantity re-runs auto-procurement for the extra.
+          Editing a confirmed order: quantities can't go below what's already {config.doneLabel.toLowerCase()} or pending. Raising
+          a quantity re-runs auto-procurement for the extra.
         </Notice>
       )}
 
       {v && <LevelBar progress={v.progress} size="lg" celebrate={party.celebrate} onCelebrated={party.done} />}
-      {v && <JourneyPanel kind={config.journeyKind} id={v.id} refreshKey={`${v.status}-${v.progress.percent}-${v.operations.length}`} />}
+      {v && (
+        <JourneyPanel
+          kind={config.journeyKind}
+          id={v.id}
+          refreshKey={`${v.status}-${v.progress.percent}-${v.operations.length}`}
+        />
+      )}
 
       <form onSubmit={save} className="card p-5">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -254,10 +281,21 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
             </select>
           </Field>
           <Field label="Address">
-            <input className="input" value={header.address} disabled={!formEditable} onChange={(e) => setHeader({ ...header, address: e.target.value })} maxLength={300} />
+            <input
+              className="input"
+              value={header.address}
+              disabled={!formEditable}
+              onChange={(e) => setHeader({ ...header, address: e.target.value })}
+              maxLength={300}
+            />
           </Field>
           <Field label={config.personLabel}>
-            <select className="input" value={header.personId} disabled={!formEditable} onChange={(e) => setHeader({ ...header, personId: e.target.value })}>
+            <select
+              className="input"
+              value={header.personId}
+              disabled={!formEditable}
+              onChange={(e) => setHeader({ ...header, personId: e.target.value })}
+            >
               <option value="">—</option>
               {people.data?.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -267,7 +305,13 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
             </select>
           </Field>
           <Field label={config.dateLabel}>
-            <input className="input" type="date" value={header.date} disabled={!formEditable} onChange={(e) => setHeader({ ...header, date: e.target.value })} />
+            <input
+              className="input"
+              type="date"
+              value={header.date}
+              disabled={!formEditable}
+              onChange={(e) => setHeader({ ...header, date: e.target.value })}
+            />
           </Field>
           {v && (
             <Field label="Created">
@@ -276,7 +320,10 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
           )}
           {v?.origin && (
             <Field label="Source document">
-              <Link to={`/${v.origin.startsWith('SO') ? 'sales' : 'manufacturing'}?q=${v.origin}`} className="input block text-indigo-600 hover:underline">
+              <Link
+                to={`/${v.origin.startsWith('SO') ? 'sales' : 'manufacturing'}?q=${v.origin}`}
+                className="input block text-indigo-600 hover:underline"
+              >
                 {v.origin}
               </Link>
             </Field>
@@ -296,10 +343,15 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
         />
       </div>
 
-      {v && <OperationsPanel operations={v.operations} onChanged={() => {
+      {v && (
+        <OperationsPanel
+          operations={v.operations}
+          onChanged={() => {
             setNotice(null);
             void order.reload();
-          }} />}
+          }}
+        />
+      )}
 
       {opOpen && v && (
         <PlaceOperationDialog
@@ -317,9 +369,21 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   );
 }
 
-function PlaceOperationDialog<D>({ config, order, onClose, onPlaced }: { config: OrderConfig<D>; order: OrderView; onClose: () => void; onPlaced: (ref: string) => void }) {
+function PlaceOperationDialog<D>({
+  config,
+  order,
+  onClose,
+  onPlaced,
+}: {
+  config: OrderConfig<D>;
+  order: OrderView;
+  onClose: () => void;
+  onPlaced: (ref: string) => void;
+}) {
   const open = order.lines.filter((l) => l.quantity - l.done - l.pending > 0);
-  const [quantities, setQuantities] = useState<Record<number, string>>(Object.fromEntries(open.map((l) => [l.id, String(l.quantity - l.done - l.pending)])));
+  const [quantities, setQuantities] = useState<Record<number, string>>(
+    Object.fromEntries(open.map((l) => [l.id, String(l.quantity - l.done - l.pending)])),
+  );
   const action = useAction();
   const submit = async () => {
     const op = await action.run(() => api.post<OperationDTO>('/operations', config.operationBody(order, quantities)));
@@ -374,7 +438,12 @@ export function opLines(quantities: Record<number, string>, key: 'salesOrderLine
 
 export function headerBody(form: HeaderForm, lines: EditableLine[]) {
   return {
-    lines: lines.map((l) => ({ ...(l.id ? { id: l.id } : {}), productId: Number(l.productId), quantity: Number(l.quantity), price: Number(l.price) })),
+    lines: lines.map((l) => ({
+      ...(l.id ? { id: l.id } : {}),
+      productId: Number(l.productId),
+      quantity: Number(l.quantity),
+      price: Number(l.price),
+    })),
     address: form.address || null,
     person: form.personId ? Number(form.personId) : null,
     date: form.date ? new Date(`${form.date}T12:00:00`).toISOString() : null,

@@ -19,13 +19,17 @@ async function confirmedSale(stock: number | string, qty: number | string) {
   const salesAdmin = await as({ SALES: 'ADMIN' });
   const customer = await makeContact('CUSTOMER');
   const product = await makeProduct({ onHand: stock });
-  const so = await salesAdmin.post('/api/sales').send({ customerId: customer.id, lines: [{ productId: product.id, quantity: qty }] });
+  const so = await salesAdmin
+    .post('/api/sales')
+    .send({ customerId: customer.id, lines: [{ productId: product.id, quantity: qty }] });
   await salesAdmin.post(`/api/sales/${so.body.id}/confirm`);
   return { salesAdmin, product, so: so.body as { id: number; lines: { id: number }[] } };
 }
 
 function deliver(agent: Agent, so: { id: number; lines: { id: number }[] }, quantity: number | string) {
-  return agent.post('/api/operations').send({ type: 'DELIVERY', salesOrderId: so.id, lines: [{ salesOrderLineId: so.lines[0]!.id, quantity }] });
+  return agent
+    .post('/api/operations')
+    .send({ type: 'DELIVERY', salesOrderId: so.id, lines: [{ salesOrderLineId: so.lines[0]!.id, quantity }] });
 }
 
 describe('stock operations: place, then confirm', () => {
@@ -35,7 +39,12 @@ describe('stock operations: place, then confirm', () => {
     const { salesAdmin, product, so } = await confirmedSale(10, 4);
     const op = await deliver(salesAdmin, so, 4);
     expect(op.status).toBe(201);
-    expect(op.body).toMatchObject({ reference: 'OP-000001', type: 'DELIVERY', status: 'PLACED', source: { kind: 'SO', id: so.id } });
+    expect(op.body).toMatchObject({
+      reference: 'OP-000001',
+      type: 'DELIVERY',
+      status: 'PLACED',
+      source: { kind: 'SO', id: so.id },
+    });
     expect(await onHand(product.id)).toBe('10');
     const confirmed = await salesAdmin.post(`/api/operations/${op.body.id}/confirm`);
     expect(confirmed.status).toBe(200);
@@ -71,11 +80,17 @@ describe('stock operations: place, then confirm', () => {
     const vendor = await makeContact('VENDOR');
     const legs = await makeProduct({ onHand: 0 });
     const purchaseAdmin = await as({ PURCHASE: 'ADMIN' });
-    const po = await purchaseAdmin.post('/api/purchase').send({ vendorId: vendor.id, lines: [{ productId: legs.id, quantity: 12 }] });
+    const po = await purchaseAdmin
+      .post('/api/purchase')
+      .send({ vendorId: vendor.id, lines: [{ productId: legs.id, quantity: 12 }] });
     await purchaseAdmin.post(`/api/purchase/${po.body.id}/confirm`);
     const purchaseUser = await as({ PURCHASE: 'USER' });
     const receipt = (q: number) =>
-      purchaseUser.post('/api/operations').send({ type: 'RECEIPT', purchaseOrderId: po.body.id, lines: [{ purchaseOrderLineId: po.body.lines[0].id, quantity: q }] });
+      purchaseUser.post('/api/operations').send({
+        type: 'RECEIPT',
+        purchaseOrderId: po.body.id,
+        lines: [{ purchaseOrderLineId: po.body.lines[0].id, quantity: q }],
+      });
     const a = await receipt(5);
     expect(a.status).toBe(201);
     expect((await purchaseUser.post(`/api/operations/${a.body.id}/reject`).send({ reason: 'Damaged' })).status).toBe(403);
@@ -127,7 +142,9 @@ describe('stock operations: place, then confirm', () => {
     const product = await makeProduct({ onHand: 5 });
     const ops: number[] = [];
     for (let i = 0; i < 2; i++) {
-      const so = await salesAdmin.post('/api/sales').send({ customerId: customer.id, lines: [{ productId: product.id, quantity: 5 }] });
+      const so = await salesAdmin
+        .post('/api/sales')
+        .send({ customerId: customer.id, lines: [{ productId: product.id, quantity: 5 }] });
       await salesAdmin.post(`/api/sales/${so.body.id}/confirm`);
       ops.push((await deliver(salesAdmin, so.body, 5)).body.id);
     }
@@ -159,7 +176,12 @@ describe('stock operations: place, then confirm', () => {
     expect(op.status).toBe(201);
     expect(await onHand(table.id)).toBe('0');
     expect((await agent.post(`/api/operations/${op.body.id}/confirm`)).status).toBe(200);
-    expect([await onHand(legs.id), await onHand(top.id), await onHand(screws.id), await onHand(table.id)]).toEqual(['60', '90', '880', '10']);
+    expect([await onHand(legs.id), await onHand(top.id), await onHand(screws.id), await onHand(table.id)]).toEqual([
+      '60',
+      '90',
+      '880',
+      '10',
+    ]);
     const after = await agent.get(`/api/manufacturing/${mo.body.id}`);
     expect(after.body.status).toBe('DONE');
     expect(after.body.components.map((c: { consumed: number }) => c.consumed)).toEqual([40, 10, 120]);
@@ -182,14 +204,20 @@ describe('stock operations: place, then confirm', () => {
   it('adjustment target 50 from 42 posts +8; reject posts nothing', async () => {
     const product = await makeProduct({ onHand: 42 });
     const inventory = await as({ PRODUCTS: 'ADMIN' });
-    const a = await inventory.post('/api/operations').send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 50, reason: 'Stock count' });
+    const a = await inventory
+      .post('/api/operations')
+      .send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 50, reason: 'Stock count' });
     expect(a.status).toBe(201);
     expect(await onHand(product.id)).toBe('42');
     await inventory.post(`/api/operations/${a.body.id}/confirm`);
     expect(await onHand(product.id)).toBe('50');
-    const move = await prisma.stockMove.findFirstOrThrow({ where: { productId: product.id, type: 'ADJUSTMENT', reference: 'OP-000001' } });
+    const move = await prisma.stockMove.findFirstOrThrow({
+      where: { productId: product.id, type: 'ADJUSTMENT', reference: 'OP-000001' },
+    });
     expect(move.quantity.toString()).toBe('8');
-    const b = await inventory.post('/api/operations').send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 0, reason: 'Oops' });
+    const b = await inventory
+      .post('/api/operations')
+      .send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 0, reason: 'Oops' });
     const rejected = await inventory.post(`/api/operations/${b.body.id}/reject`).send({ reason: 'Wrong count' });
     expect(rejected.body).toMatchObject({ status: 'REJECTED', rejectReason: 'Wrong count' });
     expect(await onHand(product.id)).toBe('50');
@@ -197,7 +225,9 @@ describe('stock operations: place, then confirm', () => {
 
   it('PRODUCTS USER cannot place adjustment → 403', async () => {
     const product = await makeProduct({ onHand: 1 });
-    const res = await (await as({ PRODUCTS: 'USER' })).post('/api/operations').send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 5, reason: 'Count' });
+    const res = await (await as({ PRODUCTS: 'USER' }))
+      .post('/api/operations')
+      .send({ type: 'ADJUSTMENT', productId: product.id, targetQty: 5, reason: 'Count' });
     expect(res.status).toBe(403);
   });
 

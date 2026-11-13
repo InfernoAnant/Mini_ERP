@@ -55,10 +55,24 @@ export default function SignupPage() {
             <input className="input" type="email" value={form.email} onChange={set('email')} required />
           </Field>
           <Field label="Password">
-            <input className="input" type="password" value={form.password} onChange={set('password')} autoComplete="new-password" required />
+            <input
+              className="input"
+              type="password"
+              value={form.password}
+              onChange={set('password')}
+              autoComplete="new-password"
+              required
+            />
           </Field>
           <Field label="Re-enter password">
-            <input className="input" type="password" value={form.confirm} onChange={set('confirm')} autoComplete="new-password" required />
+            <input
+              className="input"
+              type="password"
+              value={form.confirm}
+              onChange={set('confirm')}
+              autoComplete="new-password"
+              required
+            />
           </Field>
         </div>
         <button type="submit" className="btn-primary mt-4 w-full justify-center" disabled={busy}>

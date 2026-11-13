@@ -21,7 +21,10 @@ const CHIP_STYLES: Record<string, string> = {
 
 function Chip({ to, count, text, tone }: { to: string; count: number; text: string; tone: string }) {
   return (
-    <Link to={to} className={`flex min-w-[5.5rem] flex-col items-center rounded-lg border bg-white px-3 py-2 hover:shadow-sm ${tone}`}>
+    <Link
+      to={to}
+      className={`flex min-w-[5.5rem] flex-col items-center rounded-lg border bg-white px-3 py-2 hover:shadow-sm ${tone}`}
+    >
       <span className="text-xl font-semibold">{count}</span>
       <span className="text-center text-xs">{text}</span>
     </Link>
@@ -35,13 +38,23 @@ function OrderCard({ title, path, section, statuses }: CardDef) {
       <span className="w-8 shrink-0 text-xs font-semibold uppercase text-slate-500">{kind === 'all' ? 'All' : 'My'}</span>
       <div className="flex flex-wrap gap-2">
         {statuses.map((s) => (
-          <Chip key={s} to={`${path}?status=${s}${kind === 'my' ? '&mine=1' : ''}`} count={section[kind][s] ?? 0} text={label(s)} tone={CHIP_STYLES[s] ?? 'border-slate-300'} />
+          <Chip
+            key={s}
+            to={`${path}?status=${s}${kind === 'my' ? '&mine=1' : ''}`}
+            count={section[kind][s] ?? 0}
+            text={label(s)}
+            tone={CHIP_STYLES[s] ?? 'border-slate-300'}
+          />
         ))}
         <Chip
           to={`${path}?late=1${kind === 'my' ? '&mine=1' : ''}`}
           count={kind === 'all' ? section.late : section.myLate}
           text="Late"
-          tone={(kind === 'all' ? section.late : section.myLate) > 0 ? 'border-rose-400 text-rose-700' : 'border-slate-200 text-slate-400'}
+          tone={
+            (kind === 'all' ? section.late : section.myLate) > 0
+              ? 'border-rose-400 text-rose-700'
+              : 'border-slate-200 text-slate-400'
+          }
         />
       </div>
     </div>
@@ -68,9 +81,24 @@ export default function DashboardPage() {
   if (!data) return error ? <ErrorBanner message={error} /> : <Spinner />;
 
   const cards: CardDef[] = [
-    { title: 'Sale Orders', path: '/sales', section: data.sales, statuses: ['DRAFT', 'CONFIRMED', 'PARTIALLY_DELIVERED', 'FULLY_DELIVERED'] },
-    { title: 'Purchase Orders', path: '/purchase', section: data.purchase, statuses: ['DRAFT', 'CONFIRMED', 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED'] },
-    { title: 'Manufacturing Orders', path: '/manufacturing', section: data.manufacturing, statuses: ['DRAFT', 'CONFIRMED', 'IN_PROGRESS', 'TO_CLOSE', 'DONE'] },
+    {
+      title: 'Sale Orders',
+      path: '/sales',
+      section: data.sales,
+      statuses: ['DRAFT', 'CONFIRMED', 'PARTIALLY_DELIVERED', 'FULLY_DELIVERED'],
+    },
+    {
+      title: 'Purchase Orders',
+      path: '/purchase',
+      section: data.purchase,
+      statuses: ['DRAFT', 'CONFIRMED', 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED'],
+    },
+    {
+      title: 'Manufacturing Orders',
+      path: '/manufacturing',
+      section: data.manufacturing,
+      statuses: ['DRAFT', 'CONFIRMED', 'IN_PROGRESS', 'TO_CLOSE', 'DONE'],
+    },
   ];
 
   return (
@@ -81,12 +109,16 @@ export default function DashboardPage() {
           {cards.map((c) => (
             <OrderCard key={c.path} {...c} />
           ))}
-          {cards.every((c) => !c.section) && <div className="card p-6 text-sm text-slate-500">You don't have access to any order modules yet.</div>}
+          {cards.every((c) => !c.section) && (
+            <div className="card p-6 text-sm text-slate-500">You don't have access to any order modules yet.</div>
+          )}
         </div>
         <div className="grid h-fit gap-4">
           <Link to="/operations?status=PLACED" className="card block p-4 hover:border-indigo-300">
             <div className="text-sm text-slate-500">Stock operations awaiting confirmation</div>
-            <div className={`text-3xl font-semibold ${data.awaitingConfirmation ? 'text-amber-600' : 'text-slate-400'}`}>{data.awaitingConfirmation}</div>
+            <div className={`text-3xl font-semibold ${data.awaitingConfirmation ? 'text-amber-600' : 'text-slate-400'}`}>
+              {data.awaitingConfirmation}
+            </div>
           </Link>
           <div className="card">
             <h2 className="border-b border-slate-200 px-4 py-3 font-semibold">Material shortages</h2>

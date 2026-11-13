@@ -42,7 +42,13 @@ describe('bills of materials', () => {
       ['Wooden Top', 1],
       ['Screws', 12],
     ]);
-    expect(res.body.operations.map((o: { name: string; durationMinutes: number; workCenter: { name: string } }) => [o.name, o.durationMinutes, o.workCenter.name])).toEqual([
+    expect(
+      res.body.operations.map((o: { name: string; durationMinutes: number; workCenter: { name: string } }) => [
+        o.name,
+        o.durationMinutes,
+        o.workCenter.name,
+      ]),
+    ).toEqual([
       ['Assembly', 60, 'Assembly Line'],
       ['Painting', 30, 'Paint Floor'],
       ['Packing', 20, 'Packaging Unit'],
@@ -66,7 +72,9 @@ describe('bills of materials', () => {
     const { legs, input } = await setup();
     const agent = await agentFor(await makeUser({ access: { BOM: 'ADMIN' } }));
     const created = await agent.post('/api/boms').send(input);
-    const res = await agent.patch(`/api/boms/${created.body.id}`).send({ ...input, components: [{ productId: legs.id, quantity: 3 }] });
+    const res = await agent
+      .patch(`/api/boms/${created.body.id}`)
+      .send({ ...input, components: [{ productId: legs.id, quantity: 3 }] });
     expect(res.status).toBe(200);
     expect(res.body.components).toHaveLength(1);
     expect(await prisma.auditLog.count({ where: { module: 'BOM', field: 'components' } })).toBe(1);

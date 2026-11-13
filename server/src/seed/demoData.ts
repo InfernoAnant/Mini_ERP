@@ -25,7 +25,12 @@ export const DEMO_USERS: DemoUser[] = [
   { loginId: 'sysadmin', name: 'Admin', position: 'System Administrator', isSystemAdmin: true, access: {} },
   { loginId: 'salesuser', name: 'Amit Sharma', position: 'Sales Manager', access: { SALES: 'ADMIN', PRODUCTS: 'USER' } },
   { loginId: 'purchaser', name: 'Neha Verma', position: 'Purchase Manager', access: { PURCHASE: 'ADMIN', PRODUCTS: 'USER' } },
-  { loginId: 'mfguser', name: 'Meera Singh', position: 'Production Head', access: { MANUFACTURING: 'ADMIN', BOM: 'ADMIN', PRODUCTS: 'USER' } },
+  {
+    loginId: 'mfguser',
+    name: 'Meera Singh',
+    position: 'Production Head',
+    access: { MANUFACTURING: 'ADMIN', BOM: 'ADMIN', PRODUCTS: 'USER' },
+  },
   {
     loginId: 'invmanager',
     name: 'Ravi Patel',
@@ -70,7 +75,9 @@ export async function seedDemo(): Promise<void> {
         readOnly: u.readOnly ?? false,
         isDemoLocked: true,
         address: 'Shiv Furniture Works, Ahmedabad',
-        access: { create: Object.entries(u.access).map(([module, level]) => ({ module: module as Module, level: level as AccessLevel })) },
+        access: {
+          create: Object.entries(u.access).map(([module, level]) => ({ module: module as Module, level: level as AccessLevel })),
+        },
       },
     });
   }
@@ -83,7 +90,8 @@ export async function seedDemo(): Promise<void> {
   const [assembly, paint, pack] = await Promise.all(
     ['Assembly Line', 'Paint Floor', 'Packaging Unit'].map((name) => prisma.workCenter.create({ data: { name } })),
   );
-  const contact = (name: string, type: 'CUSTOMER' | 'VENDOR', address: string) => prisma.contact.create({ data: { name, type, address } });
+  const contact = (name: string, type: 'CUSTOMER' | 'VENDOR', address: string) =>
+    prisma.contact.create({ data: { name, type, address } });
   const timber = await contact('Timber Traders', 'VENDOR', 'Plot 12, GIDC Naroda, Ahmedabad');
   const hardware = await contact('Hardware Hub', 'VENDOR', '45 Lohar Chawl, Mumbai');
   const seating = await contact('Comfort Seating Co.', 'VENDOR', 'Sector 63, Noida');
@@ -176,52 +184,128 @@ export async function seedDemo(): Promise<void> {
   const confirmAll = async (placed: { id: number }, by: AuthUser) => confirmOperation(by, placed.id);
 
   // Sales: fully delivered, partially delivered, late, draft, cancelled.
-  const so1 = await createSales(sales, { customerId: taj.id, scheduledDate: daysFromNow(-8), lines: [{ productId: woodenChair.id, quantity: 20 }] });
+  const so1 = await createSales(sales, {
+    customerId: taj.id,
+    scheduledDate: daysFromNow(-8),
+    lines: [{ productId: woodenChair.id, quantity: 20 }],
+  });
   await confirmSales(sales, so1.id);
-  await confirmAll(await placeOperation(sales, { type: 'DELIVERY', salesOrderId: so1.id, lines: [{ salesOrderLineId: so1.lines[0]!.id, quantity: 20 }] }), sales);
+  await confirmAll(
+    await placeOperation(sales, {
+      type: 'DELIVERY',
+      salesOrderId: so1.id,
+      lines: [{ salesOrderLineId: so1.lines[0]!.id, quantity: 20 }],
+    }),
+    sales,
+  );
   await backdate('salesOrder', so1.id, 12);
 
-  const so2 = await createSales(sales, { customerId: infosys.id, scheduledDate: daysFromNow(4), lines: [{ productId: woodenChair.id, quantity: 30 }] });
+  const so2 = await createSales(sales, {
+    customerId: infosys.id,
+    scheduledDate: daysFromNow(4),
+    lines: [{ productId: woodenChair.id, quantity: 30 }],
+  });
   await confirmSales(sales, so2.id);
-  await confirmAll(await placeOperation(sales, { type: 'DELIVERY', salesOrderId: so2.id, lines: [{ salesOrderLineId: so2.lines[0]!.id, quantity: 10 }] }), inventory);
+  await confirmAll(
+    await placeOperation(sales, {
+      type: 'DELIVERY',
+      salesOrderId: so2.id,
+      lines: [{ salesOrderLineId: so2.lines[0]!.id, quantity: 10 }],
+    }),
+    inventory,
+  );
   await backdate('salesOrder', so2.id, 5);
 
-  const so3 = await createSales(sales, { customerId: mrf.id, scheduledDate: daysFromNow(-3), lines: [{ productId: shelf.id, quantity: 2 }] });
+  const so3 = await createSales(sales, {
+    customerId: mrf.id,
+    scheduledDate: daysFromNow(-3),
+    lines: [{ productId: shelf.id, quantity: 2 }],
+  });
   await confirmSales(sales, so3.id);
   await backdate('salesOrder', so3.id, 7);
 
-  await createSales(sales, { customerId: suzuki.id, scheduledDate: daysFromNow(10), lines: [{ productId: woodenChair.id, quantity: 5 }] });
+  await createSales(sales, {
+    customerId: suzuki.id,
+    scheduledDate: daysFromNow(10),
+    lines: [{ productId: woodenChair.id, quantity: 5 }],
+  });
   const so5 = await createSales(sales, { customerId: taj.id, lines: [{ productId: officeChair.id, quantity: 1 }] });
   await cancelSales(sales, so5.id);
 
   // Purchase: fully received, partially received, confirmed with a receipt awaiting confirmation, draft, cancelled.
-  const po1 = await createPurchase(purchaser, { vendorId: hardware.id, expectedDate: daysFromNow(-6), lines: [{ productId: screws.id, quantity: 200 }] });
+  const po1 = await createPurchase(purchaser, {
+    vendorId: hardware.id,
+    expectedDate: daysFromNow(-6),
+    lines: [{ productId: screws.id, quantity: 200 }],
+  });
   await confirmPurchase(purchaser, po1.id);
-  await confirmAll(await placeOperation(purchaser, { type: 'RECEIPT', purchaseOrderId: po1.id, lines: [{ purchaseOrderLineId: po1.lines[0]!.id, quantity: 200 }] }), inventory);
+  await confirmAll(
+    await placeOperation(purchaser, {
+      type: 'RECEIPT',
+      purchaseOrderId: po1.id,
+      lines: [{ purchaseOrderLineId: po1.lines[0]!.id, quantity: 200 }],
+    }),
+    inventory,
+  );
   await backdate('purchaseOrder', po1.id, 9);
 
-  const po2 = await createPurchase(purchaser, { vendorId: timber.id, expectedDate: daysFromNow(-1), lines: [{ productId: panel.id, quantity: 20 }] });
+  const po2 = await createPurchase(purchaser, {
+    vendorId: timber.id,
+    expectedDate: daysFromNow(-1),
+    lines: [{ productId: panel.id, quantity: 20 }],
+  });
   await confirmPurchase(purchaser, po2.id);
-  await confirmAll(await placeOperation(purchaser, { type: 'RECEIPT', purchaseOrderId: po2.id, lines: [{ purchaseOrderLineId: po2.lines[0]!.id, quantity: 10 }] }), purchaser);
+  await confirmAll(
+    await placeOperation(purchaser, {
+      type: 'RECEIPT',
+      purchaseOrderId: po2.id,
+      lines: [{ purchaseOrderLineId: po2.lines[0]!.id, quantity: 10 }],
+    }),
+    purchaser,
+  );
   await backdate('purchaseOrder', po2.id, 6);
 
-  const po3 = await createPurchase(purchaser, { vendorId: seating.id, expectedDate: daysFromNow(2), lines: [{ productId: officeChair.id, quantity: 5 }] });
+  const po3 = await createPurchase(purchaser, {
+    vendorId: seating.id,
+    expectedDate: daysFromNow(2),
+    lines: [{ productId: officeChair.id, quantity: 5 }],
+  });
   await confirmPurchase(purchaser, po3.id);
-  await placeOperation(purchaser, { type: 'RECEIPT', purchaseOrderId: po3.id, lines: [{ purchaseOrderLineId: po3.lines[0]!.id, quantity: 5 }] });
+  await placeOperation(purchaser, {
+    type: 'RECEIPT',
+    purchaseOrderId: po3.id,
+    lines: [{ purchaseOrderLineId: po3.lines[0]!.id, quantity: 5 }],
+  });
   await backdate('purchaseOrder', po3.id, 3);
 
-  await createPurchase(purchaser, { vendorId: hardware.id, expectedDate: daysFromNow(7), lines: [{ productId: screws.id, quantity: 100 }] });
+  await createPurchase(purchaser, {
+    vendorId: hardware.id,
+    expectedDate: daysFromNow(7),
+    lines: [{ productId: screws.id, quantity: 100 }],
+  });
   const po5 = await createPurchase(purchaser, { vendorId: timber.id, lines: [{ productId: diningTop.id, quantity: 2 }] });
   await cancelPurchase(purchaser, po5.id);
 
   // Manufacturing: one done, one in progress.
-  const mo1 = await createMo(mfg, { productId: shelf.id, quantity: 2, bomId: shelfBom.id, assigneeId: mfg.id, deadline: daysFromNow(-2) });
+  const mo1 = await createMo(mfg, {
+    productId: shelf.id,
+    quantity: 2,
+    bomId: shelfBom.id,
+    assigneeId: mfg.id,
+    deadline: daysFromNow(-2),
+  });
   const mo1c = await confirmMo(mfg, mo1.id);
   for (const wo of mo1c.order.workOrders) await completeWorkOrder(mfg, mo1.id, wo.id, wo.expectedMinutes + 5);
   await confirmAll(await placeOperation(mfg, { type: 'PRODUCTION', manufacturingOrderId: mo1.id }), mfg);
   await backdate('manufacturingOrder', mo1.id, 4);
 
-  const mo2 = await createMo(mfg, { productId: shelf.id, quantity: 3, bomId: shelfBom.id, assigneeId: mfg.id, deadline: daysFromNow(3) });
+  const mo2 = await createMo(mfg, {
+    productId: shelf.id,
+    quantity: 3,
+    bomId: shelfBom.id,
+    assigneeId: mfg.id,
+    deadline: daysFromNow(3),
+  });
   const mo2c = await confirmMo(mfg, mo2.id);
   const firstWo = mo2c.order.workOrders[0];
   if (firstWo) await completeWorkOrder(mfg, mo2.id, firstWo.id, firstWo.expectedMinutes - 10);

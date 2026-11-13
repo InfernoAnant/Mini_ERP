@@ -22,7 +22,8 @@ export default function OperationsPage() {
     <div className="max-w-5xl">
       <PageHeader title="Stock Operations" />
       <p className="mb-4 text-sm text-slate-600">
-        Deliveries, receipts, production and adjustments are placed first. Stock only moves when a supervisor or manager confirms them.
+        Deliveries, receipts, production and adjustments are placed first. Stock only moves when a supervisor or manager confirms
+        them.
       </p>
       <div className="mb-4 flex gap-1 border-b border-slate-200">
         {TABS.map(([key, text]) => (
@@ -52,13 +53,23 @@ export default function OperationsPage() {
       )}
       {data && pages > 1 && (
         <div className="mt-3 flex justify-end gap-2 text-sm">
-          <button type="button" className="btn-secondary" disabled={page <= 1} onClick={() => setParams({ status, page: String(page - 1) })}>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={page <= 1}
+            onClick={() => setParams({ status, page: String(page - 1) })}
+          >
             ‹ Prev
           </button>
           <span className="self-center">
             Page {page} of {pages}
           </span>
-          <button type="button" className="btn-secondary" disabled={page >= pages} onClick={() => setParams({ status, page: String(page + 1) })}>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={page >= pages}
+            onClick={() => setParams({ status, page: String(page + 1) })}
+          >
             Next ›
           </button>
         </div>

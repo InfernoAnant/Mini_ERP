@@ -55,7 +55,9 @@ describe('manufacturing orders', () => {
   it('cannot complete work orders on a draft MO', async () => {
     const { agent, table, bom } = await setup();
     const mo = await agent.post('/api/manufacturing').send({ productId: table.id, quantity: 1, bomId: bom.id });
-    const res = await agent.post(`/api/manufacturing/${mo.body.id}/work-orders/${mo.body.workOrders[0].id}/complete`).send({ realMinutes: 5 });
+    const res = await agent
+      .post(`/api/manufacturing/${mo.body.id}/work-orders/${mo.body.workOrders[0].id}/complete`)
+      .send({ realMinutes: 5 });
     expect(res.status).toBe(409);
   });
 

@@ -20,7 +20,15 @@ export default function OperationsPanel({ operations, onChanged }: { operations:
   );
 }
 
-export function OperationRow({ op, onChanged, showSource = false }: { op: OperationDTO; onChanged: () => void; showSource?: boolean }) {
+export function OperationRow({
+  op,
+  onChanged,
+  showSource = false,
+}: {
+  op: OperationDTO;
+  onChanged: () => void;
+  showSource?: boolean;
+}) {
   const { canConfirmOperation } = useAuth();
   const action = useAction();
   const [rejecting, setRejecting] = useState(false);
@@ -70,7 +78,8 @@ export function OperationRow({ op, onChanged, showSource = false }: { op: Operat
       </div>
       <div className="mt-1 text-xs text-slate-500">
         Placed by {op.placedBy?.name ?? '—'} · {dateTime(op.placedAt)}
-        {op.decidedBy && ` · ${op.status === 'CONFIRMED' ? 'Confirmed' : 'Rejected'} by ${op.decidedBy.name} · ${dateTime(op.decidedAt)}`}
+        {op.decidedBy &&
+          ` · ${op.status === 'CONFIRMED' ? 'Confirmed' : 'Rejected'} by ${op.decidedBy.name} · ${dateTime(op.decidedAt)}`}
         {op.rejectReason && ` · "${op.rejectReason}"`}
       </div>
       <ErrorBanner message={action.error} onClose={() => action.setError(null)} />
@@ -90,7 +99,13 @@ export function OperationRow({ op, onChanged, showSource = false }: { op: Operat
           }
         >
           <Field label="Reason">
-            <input className="input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Goods damaged in transit" autoFocus />
+            <input
+              className="input"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. Goods damaged in transit"
+              autoFocus
+            />
           </Field>
         </Modal>
       )}

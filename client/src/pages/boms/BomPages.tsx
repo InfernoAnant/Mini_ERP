@@ -54,7 +54,14 @@ export function BomFormPage() {
     setProductId(String(b.product.id));
     setOutputQty(String(b.outputQty));
     setComps(b.components.map((c) => ({ key: ++k, productId: String(c.productId), quantity: String(c.quantity) })));
-    setOps(b.operations.map((o) => ({ key: ++k, name: o.name, workCenterId: String(o.workCenter.id), durationMinutes: String(o.durationMinutes) })));
+    setOps(
+      b.operations.map((o) => ({
+        key: ++k,
+        name: o.name,
+        workCenterId: String(o.workCenter.id),
+        durationMinutes: String(o.durationMinutes),
+      })),
+    );
   }, [bom.data]);
 
   if (!isNew && !bom.data) return bom.error ? <ErrorBanner message={bom.error} /> : <Spinner />;
@@ -66,7 +73,11 @@ export function BomFormPage() {
       productId: Number(productId),
       outputQty: Number(outputQty),
       components: comps.map((c) => ({ productId: Number(c.productId), quantity: Number(c.quantity) })),
-      operations: ops.map((o) => ({ name: o.name, workCenterId: Number(o.workCenterId), durationMinutes: Number(o.durationMinutes) })),
+      operations: ops.map((o) => ({
+        name: o.name,
+        workCenterId: Number(o.workCenterId),
+        durationMinutes: Number(o.durationMinutes),
+      })),
     };
     const res = await action.run(() => (isNew ? api.post<BomDTO>('/boms', body) : api.patch<BomDTO>(`/boms/${id}`, body)));
     if (!res) return;
@@ -78,7 +89,14 @@ export function BomFormPage() {
   };
 
   const productSelect = (value: string, onChange: (v: string) => void, label: string) => (
-    <select className="input" value={value} onChange={(e) => onChange(e.target.value)} disabled={!editable} required aria-label={label}>
+    <select
+      className="input"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={!editable}
+      required
+      aria-label={label}
+    >
       <option value="">Choose a product…</option>
       {products.data?.map((p) => (
         <option key={p.id} value={p.id}>
@@ -106,7 +124,16 @@ export function BomFormPage() {
         <div className="card grid gap-3 p-5 sm:grid-cols-2">
           <Field label="Finished product">{productSelect(productId, setProductId, 'Finished product')}</Field>
           <Field label="Quantity this BoM makes">
-            <input className="input" type="number" min="0.001" step="0.001" value={outputQty} onChange={(e) => setOutputQty(e.target.value)} disabled={!editable} required />
+            <input
+              className="input"
+              type="number"
+              min="0.001"
+              step="0.001"
+              value={outputQty}
+              onChange={(e) => setOutputQty(e.target.value)}
+              disabled={!editable}
+              required
+            />
           </Field>
         </div>
 
@@ -115,7 +142,13 @@ export function BomFormPage() {
           <div className="grid gap-2 p-4">
             {comps.map((c) => (
               <div key={c.key} className="flex items-center gap-2">
-                <div className="flex-1">{productSelect(c.productId, (v) => setComps(comps.map((x) => (x.key === c.key ? { ...x, productId: v } : x))), 'Component')}</div>
+                <div className="flex-1">
+                  {productSelect(
+                    c.productId,
+                    (v) => setComps(comps.map((x) => (x.key === c.key ? { ...x, productId: v } : x))),
+                    'Component',
+                  )}
+                </div>
                 <input
                   className="input w-28 text-right"
                   type="number"
@@ -128,14 +161,23 @@ export function BomFormPage() {
                   required
                 />
                 {editable && (
-                  <button type="button" className="text-slate-400 hover:text-rose-600" aria-label="Remove component" onClick={() => setComps(comps.filter((x) => x.key !== c.key))}>
+                  <button
+                    type="button"
+                    className="text-slate-400 hover:text-rose-600"
+                    aria-label="Remove component"
+                    onClick={() => setComps(comps.filter((x) => x.key !== c.key))}
+                  >
                     ✕
                   </button>
                 )}
               </div>
             ))}
             {editable && (
-              <button type="button" className="w-fit text-sm text-indigo-600 hover:underline" onClick={() => setComps([...comps, { key: ++k, productId: '', quantity: '1' }])}>
+              <button
+                type="button"
+                className="w-fit text-sm text-indigo-600 hover:underline"
+                onClick={() => setComps([...comps, { key: ++k, productId: '', quantity: '1' }])}
+              >
                 + Add a component
               </button>
             )}
@@ -184,7 +226,12 @@ export function BomFormPage() {
                 />
                 <span className="text-sm text-slate-500">min</span>
                 {editable && (
-                  <button type="button" className="text-slate-400 hover:text-rose-600" aria-label="Remove operation" onClick={() => setOps(ops.filter((x) => x.key !== o.key))}>
+                  <button
+                    type="button"
+                    className="text-slate-400 hover:text-rose-600"
+                    aria-label="Remove operation"
+                    onClick={() => setOps(ops.filter((x) => x.key !== o.key))}
+                  >
                     ✕
                   </button>
                 )}

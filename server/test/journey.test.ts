@@ -53,7 +53,10 @@ describe('order journey', () => {
     await purchaser.post(`/api/purchase/${po.id}/cancel`);
     const res = await (await demo('sysadmin')).get(`/api/sales/${so.id}/journey`);
     expect(res.status).toBe(200);
-    expect(res.body.children[0].children[0]).toMatchObject({ status: 'CANCELLED', progress: { cancelled: true, stage: 'Cancelled' } });
+    expect(res.body.children[0].children[0]).toMatchObject({
+      status: 'CANCELLED',
+      progress: { cancelled: true, stage: 'Cancelled' },
+    });
   });
 
   it('sales-only user sees the chain but canOpen=false on MO/PO', async () => {

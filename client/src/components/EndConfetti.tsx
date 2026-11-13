@@ -96,7 +96,16 @@ export default function EndConfetti({ onDone }: { onDone: () => void }) {
       <canvas
         ref={canvasRef}
         aria-hidden
-        style={{ position: 'fixed', left: pos.x - W / 2, top: pos.y - H / 2, width: W, height: H, pointerEvents: 'none', zIndex: 60, visibility: pos.ready ? 'visible' : 'hidden' }}
+        style={{
+          position: 'fixed',
+          left: pos.x - W / 2,
+          top: pos.y - H / 2,
+          width: W,
+          height: H,
+          pointerEvents: 'none',
+          zIndex: 60,
+          visibility: pos.ready ? 'visible' : 'hidden',
+        }}
       />
     </>
   );

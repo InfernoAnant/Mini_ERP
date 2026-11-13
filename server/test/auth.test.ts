@@ -18,19 +18,25 @@ describe('auth', () => {
   });
 
   it("signup rejects loginId 'abc'", async () => {
-    const res = await request(app()).post('/api/auth/signup').send({ ...valid, loginId: 'abc' });
+    const res = await request(app())
+      .post('/api/auth/signup')
+      .send({ ...valid, loginId: 'abc' });
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
 
   it("signup rejects weak password 'password'", async () => {
-    const res = await request(app()).post('/api/auth/signup').send({ ...valid, password: 'password' });
+    const res = await request(app())
+      .post('/api/auth/signup')
+      .send({ ...valid, password: 'password' });
     expect(res.status).toBe(400);
   });
 
   it('signup rejects duplicate email', async () => {
     await request(app()).post('/api/auth/signup').send(valid);
-    const res = await request(app()).post('/api/auth/signup').send({ ...valid, loginId: 'other123' });
+    const res = await request(app())
+      .post('/api/auth/signup')
+      .send({ ...valid, loginId: 'other123' });
     expect(res.status).toBe(409);
     expect(res.body.error.message).toMatch(/email/i);
   });
@@ -81,6 +87,12 @@ describe('auth', () => {
   it('system admin gets ADMIN on every module', async () => {
     const agent = await agentFor(await makeUser({ isSystemAdmin: true }));
     const me = await agent.get('/api/auth/me');
-    expect(me.body.user.access).toEqual({ SALES: 'ADMIN', PURCHASE: 'ADMIN', MANUFACTURING: 'ADMIN', BOM: 'ADMIN', PRODUCTS: 'ADMIN' });
+    expect(me.body.user.access).toEqual({
+      SALES: 'ADMIN',
+      PURCHASE: 'ADMIN',
+      MANUFACTURING: 'ADMIN',
+      BOM: 'ADMIN',
+      PRODUCTS: 'ADMIN',
+    });
   });
 });

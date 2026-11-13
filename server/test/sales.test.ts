@@ -41,7 +41,9 @@ describe('sales orders', () => {
     await agent.post(`/api/sales/${so.body.id}/confirm`);
     const lineId = so.body.lines[0].id;
     await prisma.salesOrderLine.update({ where: { id: lineId }, data: { deliveredQty: 6 } });
-    const res = await agent.patch(`/api/sales/${so.body.id}`).send({ customerId: customer.id, lines: [{ id: lineId, productId: chair.id, quantity: 5 }] });
+    const res = await agent
+      .patch(`/api/sales/${so.body.id}`)
+      .send({ customerId: customer.id, lines: [{ id: lineId, productId: chair.id, quantity: 5 }] });
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('QTY_BELOW_COMMITTED');
     expect((await prisma.salesOrderLine.findUniqueOrThrow({ where: { id: lineId } })).quantity.toString()).toBe('10');
@@ -55,7 +57,9 @@ describe('sales orders', () => {
     const confirmed = await agent.post(`/api/sales/${so.body.id}/confirm`);
     expect(confirmed.body.procured).toEqual([]);
     const lineId = so.body.lines[0].id;
-    const res = await agent.patch(`/api/sales/${so.body.id}`).send({ customerId: customer.id, lines: [{ id: lineId, productId: chair.id, quantity: 15 }] });
+    const res = await agent
+      .patch(`/api/sales/${so.body.id}`)
+      .send({ customerId: customer.id, lines: [{ id: lineId, productId: chair.id, quantity: 15 }] });
     expect(res.status).toBe(200);
     expect(res.body.procured).toEqual(['PO-000001']);
     const line = await prisma.purchaseOrderLine.findFirstOrThrow();
@@ -85,8 +89,12 @@ describe('sales orders', () => {
   it('list late=true returns only past-scheduled confirmed orders; mine filters by salesperson', async () => {
     const { customer, chair, agent, user } = await setup();
     const past = new Date(Date.now() - 2 * 86400000).toISOString();
-    const late = await agent.post('/api/sales').send({ customerId: customer.id, scheduledDate: past, lines: [{ productId: chair.id, quantity: 1 }] });
-    await agent.post('/api/sales').send({ customerId: customer.id, scheduledDate: past, lines: [{ productId: chair.id, quantity: 1 }] });
+    const late = await agent
+      .post('/api/sales')
+      .send({ customerId: customer.id, scheduledDate: past, lines: [{ productId: chair.id, quantity: 1 }] });
+    await agent
+      .post('/api/sales')
+      .send({ customerId: customer.id, scheduledDate: past, lines: [{ productId: chair.id, quantity: 1 }] });
     await agent.post(`/api/sales/${late.body.id}/confirm`);
     const res = await agent.get('/api/sales').query({ late: '1' });
     expect(res.body.items.map((i: { reference: string }) => i.reference)).toEqual([late.body.reference]);

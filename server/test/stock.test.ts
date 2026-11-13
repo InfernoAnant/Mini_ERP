@@ -13,8 +13,12 @@ describe('stock core', () => {
 
   it('receipt of 10 then delivery of 4 leaves onHand 6 and two ledger rows', async () => {
     const p = await makeProduct();
-    await prisma.$transaction((tx) => postMoves(tx, [{ productId: p.id, quantity: dec(10), type: 'RECEIPT', reference: 'PO-1', userId: 1 }]));
-    await prisma.$transaction((tx) => postMoves(tx, [{ productId: p.id, quantity: dec(-4), type: 'DELIVERY', reference: 'SO-1', userId: 1 }]));
+    await prisma.$transaction((tx) =>
+      postMoves(tx, [{ productId: p.id, quantity: dec(10), type: 'RECEIPT', reference: 'PO-1', userId: 1 }]),
+    );
+    await prisma.$transaction((tx) =>
+      postMoves(tx, [{ productId: p.id, quantity: dec(-4), type: 'DELIVERY', reference: 'SO-1', userId: 1 }]),
+    );
     expect(await onHand(p.id)).toBe('6');
     expect(await prisma.stockMove.count({ where: { productId: p.id } })).toBe(2);
   });
@@ -22,7 +26,9 @@ describe('stock core', () => {
   it('delivery beyond onHand throws INSUFFICIENT_STOCK and writes nothing', async () => {
     const p = await makeProduct({ onHand: 3, name: 'Screws' });
     await expect(
-      prisma.$transaction((tx) => postMoves(tx, [{ productId: p.id, quantity: dec(-5), type: 'DELIVERY', reference: 'SO-1', userId: 1 }])),
+      prisma.$transaction((tx) =>
+        postMoves(tx, [{ productId: p.id, quantity: dec(-5), type: 'DELIVERY', reference: 'SO-1', userId: 1 }]),
+      ),
     ).rejects.toMatchObject({ code: 'INSUFFICIENT_STOCK', status: 409, message: expect.stringContaining('Screws') });
     expect(await onHand(p.id)).toBe('3');
     expect(await prisma.stockMove.count({ where: { productId: p.id, reference: 'SO-1' } })).toBe(0);
@@ -49,7 +55,12 @@ describe('stock core', () => {
     const p = await makeProduct({ onHand: 10 });
     const fg = await makeProduct();
     const bom = await prisma.bom.create({ data: { reference: 'BOM-1', productId: fg.id, createdById: user.id } });
-    const so = (status: 'DRAFT' | 'CONFIRMED' | 'PARTIALLY_DELIVERED' | 'CANCELLED', qty: number, delivered: number, ref: string) =>
+    const so = (
+      status: 'DRAFT' | 'CONFIRMED' | 'PARTIALLY_DELIVERED' | 'CANCELLED',
+      qty: number,
+      delivered: number,
+      ref: string,
+    ) =>
       prisma.salesOrder.create({
         data: {
           reference: ref,

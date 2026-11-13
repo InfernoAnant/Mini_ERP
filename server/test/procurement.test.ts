@@ -12,7 +12,10 @@ async function sell(agent: Awaited<ReturnType<typeof salesAgent>>, productId: nu
   expect(so.status).toBe(201);
   const res = await agent.post(`/api/sales/${so.body.id}/confirm`);
   expect(res.status).toBe(200);
-  return res.body as { order: { id: number; reference: string; procurements: { reference: string; type: string; status: string }[] }; procured: string[] };
+  return res.body as {
+    order: { id: number; reference: string; procurements: { reference: string; type: string; status: string }[] };
+    procured: string[];
+  };
 }
 
 /** Wooden Table set to MTO manufacture with its BoM; legs/top/screws MTO purchase from Timber Traders. */
@@ -25,12 +28,22 @@ async function mtoTable(tableOnHand: number) {
     data: { procureOnDemand: true, procurementType: 'MANUFACTURING', defaultBomId: fx.bom.id, onHand: tableOnHand },
   });
   if (tableOnHand) {
-    await prisma.stockMove.create({ data: { productId: fx.table.id, quantity: tableOnHand, type: 'ADJUSTMENT', reference: 'FIXTURE', userId: 0 } });
+    await prisma.stockMove.create({
+      data: { productId: fx.table.id, quantity: tableOnHand, type: 'ADJUSTMENT', reference: 'FIXTURE', userId: 0 },
+    });
   }
-  for (const [p, onHand] of [[fx.legs, 20], [fx.top, 3]] as const) {
-    await prisma.product.update({ where: { id: p.id }, data: { procureOnDemand: true, procurementType: 'PURCHASE', vendorId: vendor.id, onHand } });
+  for (const [p, onHand] of [
+    [fx.legs, 20],
+    [fx.top, 3],
+  ] as const) {
+    await prisma.product.update({
+      where: { id: p.id },
+      data: { procureOnDemand: true, procurementType: 'PURCHASE', vendorId: vendor.id, onHand },
+    });
     await prisma.stockMove.deleteMany({ where: { productId: p.id } });
-    await prisma.stockMove.create({ data: { productId: p.id, quantity: onHand, type: 'ADJUSTMENT', reference: 'FIXTURE', userId: 0 } });
+    await prisma.stockMove.create({
+      data: { productId: p.id, quantity: onHand, type: 'ADJUSTMENT', reference: 'FIXTURE', userId: 0 },
+    });
   }
   return { ...fx, vendor };
 }
@@ -50,7 +63,14 @@ describe('MTO procurement', () => {
 
   it("MTO purchase: onHand 2, order 10 → draft PO for 8 to the product's vendor", async () => {
     const vendor = await makeContact('VENDOR', 'Comfort Seating Co.');
-    const chair = await makeProduct({ name: 'Office Chair', onHand: 2, procureOnDemand: true, procurementType: 'PURCHASE', vendorId: vendor.id, costPrice: 2000 });
+    const chair = await makeProduct({
+      name: 'Office Chair',
+      onHand: 2,
+      procureOnDemand: true,
+      procurementType: 'PURCHASE',
+      vendorId: vendor.id,
+      costPrice: 2000,
+    });
     const res = await sell(await salesAgent(), chair.id, 10);
     expect(res.procured).toEqual(['PO-000001']);
     const po = await prisma.purchaseOrder.findFirstOrThrow({ include: { lines: true } });
@@ -82,11 +102,20 @@ describe('MTO procurement', () => {
     const b = await makeProduct({ onHand: 1, procureOnDemand: true, procurementType: 'PURCHASE', vendorId: vendor.id });
     const customer = await makeContact('CUSTOMER');
     const agent = await salesAgent();
-    const so = await agent.post('/api/sales').send({ customerId: customer.id, lines: [{ productId: a.id, quantity: 3 }, { productId: b.id, quantity: 4 }] });
+    const so = await agent.post('/api/sales').send({
+      customerId: customer.id,
+      lines: [
+        { productId: a.id, quantity: 3 },
+        { productId: b.id, quantity: 4 },
+      ],
+    });
     const res = await agent.post(`/api/sales/${so.body.id}/confirm`);
     expect(res.body.procured).toEqual(['PO-000001']);
     const lines = await prisma.purchaseOrderLine.findMany({ orderBy: { id: 'asc' } });
-    expect(lines.map((l) => [l.productId, l.quantity.toString()])).toEqual([[a.id, '3'], [b.id, '3']]);
+    expect(lines.map((l) => [l.productId, l.quantity.toString()])).toEqual([
+      [a.id, '3'],
+      [b.id, '3'],
+    ]);
   });
 
   it('confirming the auto-created MO procures its short components (chain)', async () => {
@@ -98,7 +127,10 @@ describe('MTO procurement', () => {
     expect(res.status).toBe(200);
     expect(res.body.procured).toEqual(['PO-000001']); // legs 32 (have 20) + tops 8 (have 3), same vendor
     const lines = await prisma.purchaseOrderLine.findMany({ orderBy: { id: 'asc' } });
-    expect(lines.map((l) => [l.productId, l.quantity.toString()])).toEqual([[legs.id, '12'], [top.id, '5']]);
+    expect(lines.map((l) => [l.productId, l.quantity.toString()])).toEqual([
+      [legs.id, '12'],
+      [top.id, '5'],
+    ]);
     expect((await prisma.purchaseOrder.findFirstOrThrow()).origin).toBe(mo.reference);
   });
 

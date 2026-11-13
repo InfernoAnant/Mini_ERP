@@ -126,7 +126,11 @@ export async function updateBom(user: AuthUser, id: number, input: BomInput): Pr
     if (input.productId !== before.productId) {
       const usedByMo = await tx.manufacturingOrder.count({ where: { bomId: id } });
       if (usedByMo > 0 || before.defaultFor) {
-        throw new AppError(409, 'IN_USE', "This bill of materials is in use, so its finished product can't change. Create a new BoM instead.");
+        throw new AppError(
+          409,
+          'IN_USE',
+          "This bill of materials is in use, so its finished product can't change. Create a new BoM instead.",
+        );
       }
     }
     await validateRefs(tx, input);

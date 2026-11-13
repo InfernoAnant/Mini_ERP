@@ -48,7 +48,12 @@ export async function procureShortages(tx: Tx, user: AuthUser, origin: string, d
     created.push(po.reference);
   }
   for (const m of toManufacture) {
-    const mo = await createDraftMoTx(tx, user, { productId: m.productId, bomId: m.bomId, quantity: m.quantity.toNumber(), origin });
+    const mo = await createDraftMoTx(tx, user, {
+      productId: m.productId,
+      bomId: m.bomId,
+      quantity: m.quantity.toNumber(),
+      origin,
+    });
     created.push(mo.reference);
   }
   return created;

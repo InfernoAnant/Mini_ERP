@@ -47,7 +47,13 @@ export const salesConfig: OrderConfig<SalesOrderDTO> = {
   }),
   toBody: (form, lines) => {
     const b = headerBody(form, lines);
-    return { customerId: Number(form.partnerId), customerAddress: b.address, salespersonId: b.person, scheduledDate: b.date, lines: b.lines };
+    return {
+      customerId: Number(form.partnerId),
+      customerAddress: b.address,
+      salespersonId: b.person,
+      scheduledDate: b.date,
+      lines: b.lines,
+    };
   },
   operationBody: (order, q) => ({ type: 'DELIVERY', salesOrderId: order.id, lines: opLines(q, 'salesOrderLineId') }),
 };

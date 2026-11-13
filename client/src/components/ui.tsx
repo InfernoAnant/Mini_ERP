@@ -5,9 +5,12 @@ const qtyFmt = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 3 });
 
 export const money = (n: number | null | undefined) => inr.format(n ?? 0);
 export const qty = (n: number | null | undefined) => qtyFmt.format(n ?? 0);
-export const date = (s: string | null | undefined) => (s ? new Date(s).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
+export const date = (s: string | null | undefined) =>
+  s ? new Date(s).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
 export const dateTime = (s: string | null | undefined) =>
-  s ? new Date(s).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+  s
+    ? new Date(s).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—';
 /** yyyy-mm-dd for <input type="date"> */
 export const dateInput = (s: string | null | undefined) => (s ? s.slice(0, 10) : '');
 export const label = (s: string) => s.charAt(0) + s.slice(1).toLowerCase().replace(/_/g, ' ');
@@ -15,7 +18,10 @@ export const label = (s: string) => s.charAt(0) + s.slice(1).toLowerCase().repla
 export function ErrorBanner({ message, onClose }: { message: string | null; onClose?: () => void }) {
   if (!message) return null;
   return (
-    <div role="alert" className="mb-4 flex items-start justify-between gap-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+    <div
+      role="alert"
+      className="mb-4 flex items-start justify-between gap-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+    >
       <span>{message}</span>
       {onClose && (
         <button type="button" onClick={onClose} className="text-rose-500 hover:text-rose-700" aria-label="Dismiss">
@@ -54,7 +60,9 @@ const STATUS_STYLES: Record<string, string> = {
 
 export function StatusBadge({ status }: { status: string }) {
   return (
-    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[status] ?? 'bg-slate-100 text-slate-700'}`}>
+    <span
+      className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[status] ?? 'bg-slate-100 text-slate-700'}`}
+    >
       {label(status)}
     </span>
   );
@@ -85,7 +93,17 @@ export function Spinner() {
   return <div className="py-10 text-center text-sm text-slate-500">Loading…</div>;
 }
 
-export function Modal({ title, children, onClose, footer }: { title: string; children: ReactNode; onClose: () => void; footer?: ReactNode }) {
+export function Modal({
+  title,
+  children,
+  onClose,
+  footer,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+  footer?: ReactNode;
+}) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
@@ -93,7 +111,13 @@ export function Modal({ title, children, onClose, footer }: { title: string; chi
   }, [onClose]);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={title} className="card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className="card w-full max-w-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="border-b border-slate-200 px-4 py-3 font-semibold">{title}</div>
         <div className="px-4 py-3">{children}</div>
         {footer && <div className="flex justify-end gap-2 border-t border-slate-200 px-4 py-3">{footer}</div>}

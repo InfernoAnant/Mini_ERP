@@ -71,13 +71,24 @@ export default function ListPage<T extends { id: number }>(props: Props<T>) {
             update({ q: qInput.trim() });
           }}
         >
-          <input className="input" placeholder={props.searchPlaceholder ?? 'Search…'} value={qInput} onChange={(e) => setQInput(e.target.value)} aria-label="Search" />
+          <input
+            className="input"
+            placeholder={props.searchPlaceholder ?? 'Search…'}
+            value={qInput}
+            onChange={(e) => setQInput(e.target.value)}
+            aria-label="Search"
+          />
           <button type="submit" className="btn-secondary">
             Search
           </button>
         </form>
         {props.statuses && (
-          <select className="input w-auto" value={query.status ?? ''} onChange={(e) => update({ status: e.target.value })} aria-label="Status filter">
+          <select
+            className="input w-auto"
+            value={query.status ?? ''}
+            onChange={(e) => update({ status: e.target.value })}
+            aria-label="Status filter"
+          >
             <option value="">All statuses</option>
             {props.statuses.map((s) => (
               <option key={s} value={s}>
@@ -89,11 +100,19 @@ export default function ListPage<T extends { id: number }>(props: Props<T>) {
         {props.orderFilters && (
           <>
             <label className="flex items-center gap-1.5 text-sm">
-              <input type="checkbox" checked={params.get('mine') === '1'} onChange={(e) => update({ mine: e.target.checked ? '1' : null })} />
+              <input
+                type="checkbox"
+                checked={params.get('mine') === '1'}
+                onChange={(e) => update({ mine: e.target.checked ? '1' : null })}
+              />
               My
             </label>
             <label className="flex items-center gap-1.5 text-sm">
-              <input type="checkbox" checked={params.get('late') === '1'} onChange={(e) => update({ late: e.target.checked ? '1' : null })} />
+              <input
+                type="checkbox"
+                checked={params.get('late') === '1'}
+                onChange={(e) => update({ late: e.target.checked ? '1' : null })}
+              />
               Late
             </label>
           </>
@@ -178,7 +197,12 @@ export default function ListPage<T extends { id: number }>(props: Props<T>) {
           <span>
             Page {page} of {pages} · {data.total} records
           </span>
-          <button type="button" className="btn-secondary" disabled={page >= pages} onClick={() => update({ page: String(page + 1) })}>
+          <button
+            type="button"
+            className="btn-secondary"
+            disabled={page >= pages}
+            onClick={() => update({ page: String(page + 1) })}
+          >
             Next ›
           </button>
         </div>

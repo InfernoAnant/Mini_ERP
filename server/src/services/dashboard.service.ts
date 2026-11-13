@@ -34,7 +34,10 @@ async function salesSection(user: AuthUser): Promise<Section> {
 
 async function purchaseSection(user: AuthUser): Promise<Section> {
   const mine: Prisma.PurchaseOrderWhereInput = { OR: [{ responsibleId: user.id }, { createdById: user.id }] };
-  const late: Prisma.PurchaseOrderWhereInput = { status: { in: ['CONFIRMED', 'PARTIALLY_RECEIVED'] }, expectedDate: { lt: new Date() } };
+  const late: Prisma.PurchaseOrderWhereInput = {
+    status: { in: ['CONFIRMED', 'PARTIALLY_RECEIVED'] },
+    expectedDate: { lt: new Date() },
+  };
   const [all, my, lateAll, lateMine] = await Promise.all([
     prisma.purchaseOrder.groupBy({ by: ['status'], _count: { _all: true } }),
     prisma.purchaseOrder.groupBy({ by: ['status'], where: mine, _count: { _all: true } }),
@@ -70,7 +73,19 @@ export async function getDashboard(user: AuthUser) {
 /** Products whose free-to-use is negative, most short first (max 10). */
 async function shortageList() {
   const levels = await getLevels(prisma);
-  const short = [...levels.entries()].filter(([, l]) => l.free.isNegative()).sort((a, b) => a[1].free.comparedTo(b[1].free)).slice(0, 10);
-  const products = await prisma.product.findMany({ where: { id: { in: short.map(([id]) => id) } }, select: { id: true, name: true } });
-  return short.map(([id, l]) => ({ productId: id, name: products.find((p) => p.id === id)?.name ?? '', onHand: l.onHand, reserved: l.reserved, free: l.free }));
+  const short = [...levels.entries()]
+    .filter(([, l]) => l.free.isNegative())
+    .sort((a, b) => a[1].free.comparedTo(b[1].free))
+    .slice(0, 10);
+  const products = await prisma.product.findMany({
+    where: { id: { in: short.map(([id]) => id) } },
+    select: { id: true, name: true },
+  });
+  return short.map(([id, l]) => ({
+    productId: id,
+    name: products.find((p) => p.id === id)?.name ?? '',
+    onHand: l.onHand,
+    reserved: l.reserved,
+    free: l.free,
+  }));
 }

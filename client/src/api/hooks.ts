@@ -38,7 +38,7 @@ export function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
 export function useAction() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const run = useCallback(async <T,>(fn: () => Promise<T>): Promise<T | undefined> => {
+  const run = useCallback(async <T>(fn: () => Promise<T>): Promise<T | undefined> => {
     setBusy(true);
     setError(null);
     try {

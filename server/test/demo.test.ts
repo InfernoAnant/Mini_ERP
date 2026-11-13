@@ -46,7 +46,10 @@ describe('demo seed and script', () => {
     const mfg = await demoAgent('mfguser');
     const moConfirmed = await mfg.post(`/api/manufacturing/${mo.id}/confirm`);
     expect(moConfirmed.body.procured).toHaveLength(1);
-    const po = await prisma.purchaseOrder.findFirstOrThrow({ where: { origin: mo.reference }, include: { lines: { include: { product: true } } } });
+    const po = await prisma.purchaseOrder.findFirstOrThrow({
+      where: { origin: mo.reference },
+      include: { lines: { include: { product: true } } },
+    });
     expect(po.lines.map((l) => [l.product.name, l.quantity.toString()])).toEqual([
       ['Wooden Legs', '12'],
       ['Wooden Top', '5'],
@@ -65,7 +68,10 @@ describe('demo seed and script', () => {
 
     const moNow = await mfg.get(`/api/manufacturing/${mo.id}`);
     for (const wo of moNow.body.workOrders as { id: number; expectedMinutes: number }[]) {
-      expect((await mfg.post(`/api/manufacturing/${mo.id}/work-orders/${wo.id}/complete`).send({ realMinutes: wo.expectedMinutes })).status).toBe(200);
+      expect(
+        (await mfg.post(`/api/manufacturing/${mo.id}/work-orders/${wo.id}/complete`).send({ realMinutes: wo.expectedMinutes }))
+          .status,
+      ).toBe(200);
     }
     const produce = await mfg.post('/api/operations').send({ type: 'PRODUCTION', manufacturingOrderId: mo.id });
     expect((await mfg.post(`/api/operations/${produce.body.id}/confirm`)).status).toBe(200);

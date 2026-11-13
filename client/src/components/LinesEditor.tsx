@@ -27,7 +27,8 @@ let keySeq = 0;
 export const newLineKey = () => `new-${++keySeq}`;
 
 export default function LinesEditor({ lines, onChange, products, editable, priceFrom, doneLabel, showAvailability }: Props) {
-  const update = (key: string, patch: Partial<EditableLine>) => onChange(lines.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+  const update = (key: string, patch: Partial<EditableLine>) =>
+    onChange(lines.map((l) => (l.key === key ? { ...l, ...patch } : l)));
   const total = lines.reduce((s, l) => s + Number(l.quantity || 0) * Number(l.price || 0), 0);
 
   return (
@@ -60,7 +61,12 @@ export default function LinesEditor({ lines, onChange, products, editable, price
                       onChange={(e) => {
                         const id = Number(e.target.value);
                         const p = products.find((x) => x.id === id);
-                        update(l.key, { productId: id || '', price: p ? String(p[priceFrom]) : l.price, available: undefined, freeToUse: p?.free });
+                        update(l.key, {
+                          productId: id || '',
+                          price: p ? String(p[priceFrom]) : l.price,
+                          available: undefined,
+                          freeToUse: p?.free,
+                        });
                       }}
                     >
                       <option value="">Choose a product…</option>
@@ -115,7 +121,12 @@ export default function LinesEditor({ lines, onChange, products, editable, price
                 {editable && (
                   <td className="td">
                     {committed === 0 && (
-                      <button type="button" className="text-slate-400 hover:text-rose-600" aria-label="Remove line" onClick={() => onChange(lines.filter((x) => x.key !== l.key))}>
+                      <button
+                        type="button"
+                        className="text-slate-400 hover:text-rose-600"
+                        aria-label="Remove line"
+                        onClick={() => onChange(lines.filter((x) => x.key !== l.key))}
+                      >
                         ✕
                       </button>
                     )}
@@ -131,7 +142,9 @@ export default function LinesEditor({ lines, onChange, products, editable, price
           <button
             type="button"
             className="text-sm text-indigo-600 hover:underline"
-            onClick={() => onChange([...lines, { key: newLineKey(), productId: '', quantity: '1', price: '0', done: 0, pending: 0 }])}
+            onClick={() =>
+              onChange([...lines, { key: newLineKey(), productId: '', quantity: '1', price: '0', done: 0, pending: 0 }])
+            }
           >
             + Add a product
           </button>

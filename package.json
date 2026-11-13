@@ -1,7 +1,7 @@
 {
   "name": "mini-erp",
   "private": true,
-  "description": "Shiv Furniture Works \u2014 Mini ERP (workspace tooling)",
+  "description": "Shiv Furniture Works — Mini ERP (workspace tooling)",
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",

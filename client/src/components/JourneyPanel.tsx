@@ -15,7 +15,9 @@ export default function JourneyPanel({ kind, id, refreshKey }: { kind: JourneyNo
   return (
     <div className="card mb-4 p-4">
       <h2 className="mb-1 font-semibold">Supply chain</h2>
-      <p className="mb-3 text-xs text-slate-500">Orders created automatically to fulfil this one — it levels up as they finish.</p>
+      <p className="mb-3 text-xs text-slate-500">
+        Orders created automatically to fulfil this one — it levels up as they finish.
+      </p>
       <ul className="grid gap-2">
         {data.children.map((c) => (
           <Row key={`${c.kind}-${c.id}`} node={c} depth={0} />
@@ -28,7 +30,10 @@ export default function JourneyPanel({ kind, id, refreshKey }: { kind: JourneyNo
 function Row({ node, depth }: { node: JourneyNode; depth: number }) {
   return (
     <li>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-slate-100 bg-slate-50/60 px-3 py-2" style={{ marginLeft: depth * 24 }}>
+      <div
+        className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-slate-100 bg-slate-50/60 px-3 py-2"
+        style={{ marginLeft: depth * 24 }}
+      >
         <span aria-hidden>{depth > 0 ? '└' : ''}</span>
         <span aria-hidden>{ICON[node.kind]}</span>
         {node.canOpen ? (

@@ -19,7 +19,17 @@ type Form = {
   defaultBomId: string;
 };
 
-const empty: Form = { name: '', unit: 'Units', salesPrice: '', costPrice: '', initialStock: '0', procureOnDemand: false, procurementType: '', vendorId: '', defaultBomId: '' };
+const empty: Form = {
+  name: '',
+  unit: 'Units',
+  salesPrice: '',
+  costPrice: '',
+  initialStock: '0',
+  procureOnDemand: false,
+  procurementType: '',
+  vendorId: '',
+  defaultBomId: '',
+};
 
 export default function ProductFormPage() {
   const { id } = useParams();
@@ -56,7 +66,9 @@ export default function ProductFormPage() {
 
   if (!isNew && !product.data) return product.error ? <ErrorBanner message={product.error} /> : <Spinner />;
   const p = product.data;
-  const editable = isNew ? can('PRODUCTS', 'create') : can('PRODUCTS', 'edit') && (user?.access.PRODUCTS === 'ADMIN' || user?.isSystemAdmin || p?.createdById === user?.id);
+  const editable = isNew
+    ? can('PRODUCTS', 'create')
+    : can('PRODUCTS', 'edit') && (user?.access.PRODUCTS === 'ADMIN' || user?.isSystemAdmin || p?.createdById === user?.id);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const submit = async (e: FormEvent) => {
@@ -73,7 +85,9 @@ export default function ProductFormPage() {
       defaultBomId: form.defaultBomId ? Number(form.defaultBomId) : null,
     };
     if (isNew) {
-      const created = await action.run(() => api.post<ProductDTO>('/products', { ...body, initialStock: Number(form.initialStock || 0) }));
+      const created = await action.run(() =>
+        api.post<ProductDTO>('/products', { ...body, initialStock: Number(form.initialStock || 0) }),
+      );
       if (created) navigate(`/products/${created.id}`, { replace: true });
     } else {
       const updated = await action.run(() => api.patch<ProductDTO>(`/products/${id}`, body));
@@ -108,20 +122,51 @@ export default function ProductFormPage() {
         <form onSubmit={submit} className="card grid gap-4 p-5">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Product name" className="sm:col-span-2">
-              <input className="input" value={form.name} onChange={(e) => set('name', e.target.value)} disabled={!editable} required />
+              <input
+                className="input"
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                disabled={!editable}
+                required
+              />
             </Field>
             <Field label="Sales price (₹)">
-              <input className="input" type="number" min="0" step="0.01" value={form.salesPrice} onChange={(e) => set('salesPrice', e.target.value)} disabled={!editable} required />
+              <input
+                className="input"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.salesPrice}
+                onChange={(e) => set('salesPrice', e.target.value)}
+                disabled={!editable}
+                required
+              />
             </Field>
             <Field label="Cost price (₹)">
-              <input className="input" type="number" min="0" step="0.01" value={form.costPrice} onChange={(e) => set('costPrice', e.target.value)} disabled={!editable} required />
+              <input
+                className="input"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.costPrice}
+                onChange={(e) => set('costPrice', e.target.value)}
+                disabled={!editable}
+                required
+              />
             </Field>
             <Field label="Unit">
               <input className="input" value={form.unit} onChange={(e) => set('unit', e.target.value)} disabled={!editable} />
             </Field>
             {isNew && (
               <Field label="Opening stock quantity">
-                <input className="input" type="number" min="0" step="0.001" value={form.initialStock} onChange={(e) => set('initialStock', e.target.value)} />
+                <input
+                  className="input"
+                  type="number"
+                  min="0"
+                  step="0.001"
+                  value={form.initialStock}
+                  onChange={(e) => set('initialStock', e.target.value)}
+                />
               </Field>
             )}
           </div>
@@ -129,13 +174,24 @@ export default function ProductFormPage() {
           <fieldset className="rounded-md border border-slate-200 p-4">
             <legend className="px-1 text-sm font-medium">Procurement</legend>
             <label className="mb-3 flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.procureOnDemand} onChange={(e) => set('procureOnDemand', e.target.checked)} disabled={!editable} />
+              <input
+                type="checkbox"
+                checked={form.procureOnDemand}
+                onChange={(e) => set('procureOnDemand', e.target.checked)}
+                disabled={!editable}
+              />
               Procure on demand (make to order — auto-create a PO or MO when a sale is short)
             </label>
             {form.procureOnDemand && (
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Procurement type">
-                  <select className="input" value={form.procurementType} onChange={(e) => set('procurementType', e.target.value as Form['procurementType'])} disabled={!editable} required>
+                  <select
+                    className="input"
+                    value={form.procurementType}
+                    onChange={(e) => set('procurementType', e.target.value as Form['procurementType'])}
+                    disabled={!editable}
+                    required
+                  >
                     <option value="">Choose…</option>
                     <option value="PURCHASE">Purchase</option>
                     <option value="MANUFACTURING">Manufacturing</option>
@@ -143,7 +199,13 @@ export default function ProductFormPage() {
                 </Field>
                 {form.procurementType === 'PURCHASE' && (
                   <Field label="Vendor">
-                    <select className="input" value={form.vendorId} onChange={(e) => set('vendorId', e.target.value)} disabled={!editable} required>
+                    <select
+                      className="input"
+                      value={form.vendorId}
+                      onChange={(e) => set('vendorId', e.target.value)}
+                      disabled={!editable}
+                      required
+                    >
                       <option value="">Choose a vendor…</option>
                       {vendors.data?.map((v) => (
                         <option key={v.id} value={v.id}>
@@ -158,7 +220,13 @@ export default function ProductFormPage() {
                     {isNew ? (
                       <p className="text-sm text-slate-500">Save the product, create its bill of materials, then pick it here.</p>
                     ) : (
-                      <select className="input" value={form.defaultBomId} onChange={(e) => set('defaultBomId', e.target.value)} disabled={!editable} required>
+                      <select
+                        className="input"
+                        value={form.defaultBomId}
+                        onChange={(e) => set('defaultBomId', e.target.value)}
+                        disabled={!editable}
+                        required
+                      >
                         <option value="">Choose a BoM…</option>
                         {boms.data?.map((b) => (
                           <option key={b.id} value={b.id}>
@@ -201,7 +269,9 @@ export default function ProductFormPage() {
                 <dd className={`font-semibold ${p.free < 0 ? 'text-rose-600' : 'text-emerald-700'}`}>{qty(p.free)}</dd>
               </div>
             </dl>
-            <p className="mt-3 text-xs text-slate-500">Free to use = on hand − reserved by confirmed sales and manufacturing orders.</p>
+            <p className="mt-3 text-xs text-slate-500">
+              Free to use = on hand − reserved by confirmed sales and manufacturing orders.
+            </p>
           </div>
         )}
       </div>
@@ -251,12 +321,22 @@ export default function ProductFormPage() {
   );
 }
 
-function AdjustDialog({ product, onClose, onPlaced }: { product: ProductDTO; onClose: () => void; onPlaced: (op: OperationDTO) => void }) {
+function AdjustDialog({
+  product,
+  onClose,
+  onPlaced,
+}: {
+  product: ProductDTO;
+  onClose: () => void;
+  onPlaced: (op: OperationDTO) => void;
+}) {
   const [target, setTarget] = useState(String(product.onHand));
   const [reason, setReason] = useState('');
   const action = useAction();
   const submit = async () => {
-    const op = await action.run(() => api.post<OperationDTO>('/operations', { type: 'ADJUSTMENT', productId: product.id, targetQty: Number(target), reason }));
+    const op = await action.run(() =>
+      api.post<OperationDTO>('/operations', { type: 'ADJUSTMENT', productId: product.id, targetQty: Number(target), reason }),
+    );
     if (op) onPlaced(op);
   };
   return (
@@ -280,10 +360,22 @@ function AdjustDialog({ product, onClose, onPlaced }: { product: ProductDTO; onC
       </p>
       <div className="grid gap-3">
         <Field label="Counted quantity">
-          <input className="input" type="number" min="0" step="0.001" value={target} onChange={(e) => setTarget(e.target.value)} />
+          <input
+            className="input"
+            type="number"
+            min="0"
+            step="0.001"
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+          />
         </Field>
         <Field label="Reason">
-          <input className="input" value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Cycle count, damaged goods" />
+          <input
+            className="input"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="e.g. Cycle count, damaged goods"
+          />
         </Field>
       </div>
     </Modal>

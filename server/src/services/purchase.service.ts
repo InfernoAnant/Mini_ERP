@@ -108,7 +108,10 @@ export async function createDraftPurchaseTx(
   input: PurchaseInput & { origin?: string },
 ): Promise<{ id: number; reference: string }> {
   await validateRefs(tx, input);
-  const costs = await costOf(tx, input.lines.map((l) => l.productId));
+  const costs = await costOf(
+    tx,
+    input.lines.map((l) => l.productId),
+  );
   const reference = await nextRef(tx, 'PO');
   const po = await tx.purchaseOrder.create({
     data: {
@@ -156,7 +159,11 @@ export async function updatePurchase(user: AuthUser, id: number, input: Purchase
     const before = await load(tx, id);
     assertCanEdit(user, 'PURCHASE', before);
     if (!['DRAFT', ...OPEN].includes(before.status)) {
-      throw new AppError(409, 'NOT_EDITABLE', `A ${before.status.toLowerCase().replace('_', ' ')} purchase order can't be edited`);
+      throw new AppError(
+        409,
+        'NOT_EDITABLE',
+        `A ${before.status.toLowerCase().replace('_', ' ')} purchase order can't be edited`,
+      );
     }
     await validateRefs(tx, input);
     const pending = await pendingQtyByLine(tx, 'purchase', id);
@@ -166,7 +173,10 @@ export async function updatePurchase(user: AuthUser, id: number, input: Purchase
       pending,
       'received',
     );
-    const costs = await costOf(tx, input.lines.map((l) => l.productId));
+    const costs = await costOf(
+      tx,
+      input.lines.map((l) => l.productId),
+    );
     if (plan.deletes.length) await tx.purchaseOrderLine.deleteMany({ where: { id: { in: plan.deletes } } });
     for (const u of plan.updates) {
       await tx.purchaseOrderLine.update({
@@ -195,7 +205,8 @@ export async function updatePurchase(user: AuthUser, id: number, input: Purchase
       include,
     });
     await logChanges(tx, base(user, before), before, after, HEADER_FIELDS);
-    const summary = (rows: PoRow['lines']) => rows.map((l) => `${l.quantity.toString()} × ${l.product.name} @ ${l.unitCost.toString()}`).join(', ');
+    const summary = (rows: PoRow['lines']) =>
+      rows.map((l) => `${l.quantity.toString()} × ${l.product.name} @ ${l.unitCost.toString()}`).join(', ');
     await logChanges(tx, base(user, before), { lines: summary(before.lines) }, { lines: summary(after.lines) }, ['lines']);
     if (OPEN.includes(before.status)) {
       const status = progressStatus(
@@ -249,7 +260,11 @@ export async function deletePurchase(user: AuthUser, id: number): Promise<void> 
 }
 
 export function invalidTransition(action: string, status: string): AppError {
-  return new AppError(409, 'INVALID_TRANSITION', `Cannot ${action} an order in status ${status.toLowerCase().replace(/_/g, ' ')}`);
+  return new AppError(
+    409,
+    'INVALID_TRANSITION',
+    `Cannot ${action} an order in status ${status.toLowerCase().replace(/_/g, ' ')}`,
+  );
 }
 
 export const purchaseStatusSchema = z.enum(['DRAFT', 'CONFIRMED', 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED', 'CANCELLED']);

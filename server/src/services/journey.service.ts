@@ -29,14 +29,28 @@ async function node(user: AuthUser, kind: JourneyKind, id: number, depth: number
   if (kind === 'SO') {
     const d = await salesDtoById(id);
     const units = d.lines.reduce((s, l) => s.plus(l.quantity), ZERO);
-    base = { kind, id, reference: d.reference, status: d.status, progress: d.progress, title: `${d.customer.name} · ${qtyText(units)} items` };
+    base = {
+      kind,
+      id,
+      reference: d.reference,
+      status: d.status,
+      progress: d.progress,
+      title: `${d.customer.name} · ${qtyText(units)} items`,
+    };
   } else if (kind === 'PO') {
     const d = await purchaseDtoById(id);
     const summary = d.lines.map((l) => `${qtyText(l.quantity)} ${l.productName}`).join(', ');
     base = { kind, id, reference: d.reference, status: d.status, progress: d.progress, title: `${d.vendor.name} · ${summary}` };
   } else {
     const d = await moDtoById(id);
-    base = { kind, id, reference: d.reference, status: d.status, progress: d.progress, title: `${qtyText(d.quantity)} × ${d.product.name}` };
+    base = {
+      kind,
+      id,
+      reference: d.reference,
+      status: d.status,
+      progress: d.progress,
+      title: `${qtyText(d.quantity)} × ${d.product.name}`,
+    };
   }
   let children: JourneyNode[] = [];
   if (depth < MAX_DEPTH && kind !== 'PO') {

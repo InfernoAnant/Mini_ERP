@@ -34,13 +34,27 @@
 **Files:** Create `server/src/services/progress.service.ts`, `server/test/progress.test.ts`. Modify `sales.service.ts`, `purchase.service.ts`, `manufacturing.service.ts` (`toDto` adds `progress`).
 
 **Interfaces — Produces:**
+
 ```ts
-export type Progress = { level: 0 | 1 | 2 | 3 | 4; percent: number; stage: string; stages: string[]; cancelled: boolean; complete: boolean };
-export function salesProgress(o: { status: SalesStatus; lines: { quantity: Decimal; deliveredQty: Decimal; available: boolean }[]; procurementStatuses: string[] }): Progress;
+export type Progress = {
+  level: 0 | 1 | 2 | 3 | 4;
+  percent: number;
+  stage: string;
+  stages: string[];
+  cancelled: boolean;
+  complete: boolean;
+};
+export function salesProgress(o: {
+  status: SalesStatus;
+  lines: { quantity: Decimal; deliveredQty: Decimal; available: boolean }[];
+  procurementStatuses: string[];
+}): Progress;
 export function purchaseProgress(o: { status: PurchaseStatus; lines: { quantity: Decimal; receivedQty: Decimal }[] }): Progress;
 export function moProgress(o: { status: MoStatus; workOrders: { status: 'PENDING' | 'DONE' }[] }): Progress;
 ```
+
 Rules (`base(L) = 25*(L-1)`, fill = `25*fraction` within the current level):
+
 - Any `CANCELLED` → `{ level: 0, percent: 0, stage: 'Cancelled', cancelled: true, complete: false }`.
 - Sales: DRAFT → L1, 25%. CONFIRMED and not supplied → L2, 50%. Supplied = every line `available`, or at least one procurement and all of them done (`FULLY_RECEIVED` / `DONE`) → L3, 75%. Any delivered qty, or PARTIALLY_DELIVERED → L4 with `75 + 25*(Σdelivered/Σordered)`. FULLY_DELIVERED → 100, `complete: true`.
 - Purchase: DRAFT 25 (L1); CONFIRMED 50 (L2); PARTIALLY_RECEIVED → L3 with `50 + 25*(Σreceived/Σordered)`; FULLY_RECEIVED → L4, 100, complete.
@@ -53,12 +67,12 @@ Rules (`base(L) = 25*(L-1)`, fill = `25*fraction` within the current level):
   - `sales confirmed, all lines available → level 3, 75%, stage Supplied`
   - `sales confirmed, short but all procurements DONE/FULLY_RECEIVED → level 3`
   - `sales partially delivered 6 of 10 → level 4, 90%`
-  - `sales delivered 6.5 of 10 → 91% (integer)` *(Review Focus 1)*
+  - `sales delivered 6.5 of 10 → 91% (integer)` _(Review Focus 1)_
   - `sales fully delivered → 100%, complete`
   - `sales cancelled → level 0, cancelled, stage Cancelled`
   - `purchase partially received 5 of 12 → level 3, 60%`; `purchase fully received → 100 complete`
   - `mo in progress 2 of 3 work orders → level 3, 67%`; `mo to close (3/3) → 75%`; `mo done → 100 complete`
-  - `mo in progress with zero work orders → 63%` *(Review Focus 2)*
+  - `mo in progress with zero work orders → 63%` _(Review Focus 2)_
   - API: `GET /api/sales/:id returns progress; list items include progress` (create and confirm an SO via the API with enough stock → `progress.level === 3`).
 - [ ] **Step 2:** `cd server && npx vitest run test/progress.test.ts` — expect FAIL (module missing).
 - [ ] **Step 3:** Implement the service. Add `progress` to each `toDto` (sales: use the computed `lines[].available` and `procurements[].status`).
@@ -70,20 +84,32 @@ Rules (`base(L) = 25*(L-1)`, fill = `25*fraction` within the current level):
 **Files:** Modify `progress.service.ts` (add the journey) and `routes/sales.ts`, `routes/purchase.ts`, `routes/manufacturing.ts`. Test `server/test/journey.test.ts`.
 
 **Interfaces:**
+
 - Consumes: `getSales`, `getPurchase`, `getMo` DTOs (with `progress`), `assertCan`, `can`.
 - Produces:
+
 ```ts
-export type JourneyNode = { kind: 'SO' | 'PO' | 'MO'; id: number; reference: string; title: string; status: string; progress: Progress; canOpen: boolean; children: JourneyNode[] };
+export type JourneyNode = {
+  kind: 'SO' | 'PO' | 'MO';
+  id: number;
+  reference: string;
+  title: string;
+  status: string;
+  progress: Progress;
+  canOpen: boolean;
+  children: JourneyNode[];
+};
 export function getJourney(user: AuthUser, kind: 'SO' | 'PO' | 'MO', id: number): Promise<JourneyNode>;
 ```
+
 - Route: `GET /api/sales/:id/journey`, `/api/purchase/:id/journey`, `/api/manufacturing/:id/journey`. Requires `view` on the root order's module (403 otherwise).
 - Children: POs and MOs whose `origin` equals the node's reference, recursing to depth 3, ordered POs first, then by id. Child DTOs are loaded with no permission check (as procurement does). `canOpen = can(user, module, 'view')`.
 - `title`: SO `"{customer} · {Σqty} items"`; PO `"{vendor} · {line summary}"`; MO `"{qty} × {product}"`.
 
 - [ ] **Step 1: Write failing tests** (`journey.test.ts`, using `seedDemo` + the demo script's first half through the API):
   - `SO journey shows MO child and MO's PO grandchild` — after SO 10 Wooden Tables confirm, then MO confirm: root SO has one MO child; that MO has one PO child with two lines in its title.
-  - `cancelled auto-PO appears as a grey child` — cancel the PO: child `progress.cancelled === true`, root still 200. *(Review Focus 4)*
-  - `sales-only user sees the chain but canOpen=false on MO/PO` *(Review Focus 5)*
+  - `cancelled auto-PO appears as a grey child` — cancel the PO: child `progress.cancelled === true`, root still 200. _(Review Focus 4)_
+  - `sales-only user sees the chain but canOpen=false on MO/PO` _(Review Focus 5)_
   - `user without SALES view → 403 on /sales/:id/journey`
 - [ ] **Step 2:** Run — FAIL. **Step 3:** Implement. **Step 4:** Run the file, then `npm test` — PASS.
 - [ ] **Step 5:** Commit `feat(progress): order journey endpoint`.
@@ -93,12 +119,13 @@ export function getJourney(user: AuthUser, kind: 'SO' | 'PO' | 'MO', id: number)
 **Files:** Create `client/src/components/LevelBar.tsx`, `client/src/components/EndConfetti.tsx`, `client/src/components/JourneyPanel.tsx`. Modify `client/src/api/types.ts` (add `Progress`, `JourneyNode`, and `progress` on the order DTOs), `pages/orders/OrderFormPage.tsx` (and its configs pass `progress` through `OrderView`), `pages/manufacturing/MoPages.tsx`, `pages/sales/SalesPages.tsx`, `pages/purchase/PurchasePages.tsx`.
 
 **Interfaces — Produces:**
+
 - `LevelBar({ progress, size: 'lg' | 'sm', celebrate?: boolean })`:
   - `lg`: the label "Level {level} of 4 · {percent}%" (or "Cancelled"), 4 segments with stage names, filled up to `percent`, with ✓ on completed stages; `EndConfetti` is mounted inside the last segment's wrapper when `celebrate`.
   - `sm`: a thin bar plus `{percent}%` for list rows and kanban cards.
   - Colours: indigo fill, emerald when complete, slate when cancelled.
 - `EndConfetti({ onDone })`: an absolutely positioned canvas (about 160×120) centred on the bar's right end, `pointer-events: none`. Spawns about 60 particles from the end point, with gravity, fading out by 1.5s, then calls `onDone`. If `matchMedia('(prefers-reduced-motion: reduce)')` matches, it renders a 1.5s glow ring instead of particles.
-- `useCelebration(progress: Progress | undefined, key: string): boolean`: true exactly when the previous progress seen *in this page session* for `key` was below 100 and the new one is 100. It's false on first load, which covers Review Focus 3.
+- `useCelebration(progress: Progress | undefined, key: string): boolean`: true exactly when the previous progress seen _in this page session_ for `key` was below 100 and the new one is 100. It's false on first load, which covers Review Focus 3.
 - `JourneyPanel({ kind, id, refreshKey })`: fetches `/{sales|purchase|manufacturing}/{id}/journey`, re-fetching when `refreshKey` changes, and renders the children tree: reference (a link only if `canOpen`), title, a `sm` LevelBar and a status badge, indented per depth. It renders nothing when there are no children.
 
 - [ ] **Step 1:** Implement the components and wire them in:

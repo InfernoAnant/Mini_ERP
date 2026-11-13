@@ -36,20 +36,26 @@ export const placeOperationSchema = z.discriminatedUnion('type', [
 ]);
 export type PlaceOperationInput = z.infer<typeof placeOperationSchema>;
 
-const include = { lines: { include: { product: { select: { name: true } } }, orderBy: { id: 'asc' } } } satisfies Prisma.StockOperationInclude;
+const include = {
+  lines: { include: { product: { select: { name: true } } }, orderBy: { id: 'asc' } },
+} satisfies Prisma.StockOperationInclude;
 type OpRow = Prisma.StockOperationGetPayload<{ include: typeof include }>;
 
 // ---------- DTO ----------
 
 async function toDtos(db: Db, ops: OpRow[]) {
-  const ids = (key: 'salesOrderId' | 'purchaseOrderId' | 'manufacturingOrderId' | 'productId') =>
-    [...new Set(ops.map((o) => o[key]).filter((v): v is number => v !== null))];
+  const ids = (key: 'salesOrderId' | 'purchaseOrderId' | 'manufacturingOrderId' | 'productId') => [
+    ...new Set(ops.map((o) => o[key]).filter((v): v is number => v !== null)),
+  ];
   const [sos, pos, mos, products, ref] = await Promise.all([
     db.salesOrder.findMany({ where: { id: { in: ids('salesOrderId') } }, select: { id: true, reference: true } }),
     db.purchaseOrder.findMany({ where: { id: { in: ids('purchaseOrderId') } }, select: { id: true, reference: true } }),
     db.manufacturingOrder.findMany({ where: { id: { in: ids('manufacturingOrderId') } }, select: { id: true, reference: true } }),
     db.product.findMany({ where: { id: { in: ids('productId') } }, select: { id: true, name: true, onHand: true } }),
-    userRefs(db, ops.flatMap((o) => [o.placedById, o.decidedById])),
+    userRefs(
+      db,
+      ops.flatMap((o) => [o.placedById, o.decidedById]),
+    ),
   ]);
   const refOf = (list: { id: number; reference: string }[], id: number | null) => list.find((x) => x.id === id)?.reference ?? '';
   return ops.map((o) => {
@@ -93,7 +99,11 @@ async function loadDto(db: Db, id: number): Promise<OperationDTO> {
 
 // ---------- queries used by order services ----------
 
-export async function pendingQtyByLine(db: Db, kind: 'sales' | 'purchase', orderId: number): Promise<Map<number, Prisma.Decimal>> {
+export async function pendingQtyByLine(
+  db: Db,
+  kind: 'sales' | 'purchase',
+  orderId: number,
+): Promise<Map<number, Prisma.Decimal>> {
   const lines = await db.stockOperationLine.findMany({
     where: {
       operation: { status: 'PLACED', ...(kind === 'sales' ? { salesOrderId: orderId } : { purchaseOrderId: orderId }) },
@@ -121,10 +131,15 @@ export async function operationsForOrder(db: Db, ref: OrderRef): Promise<Operati
 async function lockOrder(tx: Tx, ref: OrderRef): Promise<void> {
   if (ref.salesOrderId) await tx.$queryRaw`SELECT id FROM "SalesOrder" WHERE id = ${ref.salesOrderId} FOR UPDATE`;
   if (ref.purchaseOrderId) await tx.$queryRaw`SELECT id FROM "PurchaseOrder" WHERE id = ${ref.purchaseOrderId} FOR UPDATE`;
-  if (ref.manufacturingOrderId) await tx.$queryRaw`SELECT id FROM "ManufacturingOrder" WHERE id = ${ref.manufacturingOrderId} FOR UPDATE`;
+  if (ref.manufacturingOrderId)
+    await tx.$queryRaw`SELECT id FROM "ManufacturingOrder" WHERE id = ${ref.manufacturingOrderId} FOR UPDATE`;
 }
 
-function refOfOp(op: { salesOrderId: number | null; purchaseOrderId: number | null; manufacturingOrderId: number | null }): OrderRef {
+function refOfOp(op: {
+  salesOrderId: number | null;
+  purchaseOrderId: number | null;
+  manufacturingOrderId: number | null;
+}): OrderRef {
   return {
     salesOrderId: op.salesOrderId ?? undefined,
     purchaseOrderId: op.purchaseOrderId ?? undefined,
@@ -137,13 +152,35 @@ function opBase(user: AuthUser, op: { id: number; reference: string }): AuditBas
 }
 
 const orderBase = {
-  sales: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({ userId: user.id, module: 'SALES', recordType: 'SalesOrder', recordId: o.id, reference: o.reference }),
-  purchase: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({ userId: user.id, module: 'PURCHASE', recordType: 'PurchaseOrder', recordId: o.id, reference: o.reference }),
-  mo: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({ userId: user.id, module: 'MANUFACTURING', recordType: 'ManufacturingOrder', recordId: o.id, reference: o.reference }),
+  sales: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({
+    userId: user.id,
+    module: 'SALES',
+    recordType: 'SalesOrder',
+    recordId: o.id,
+    reference: o.reference,
+  }),
+  purchase: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({
+    userId: user.id,
+    module: 'PURCHASE',
+    recordType: 'PurchaseOrder',
+    recordId: o.id,
+    reference: o.reference,
+  }),
+  mo: (user: AuthUser, o: { id: number; reference: string }): AuditBase => ({
+    userId: user.id,
+    module: 'MANUFACTURING',
+    recordType: 'ManufacturingOrder',
+    recordId: o.id,
+    reference: o.reference,
+  }),
 };
 
 function notOpen(what: string, status: string): AppError {
-  return new AppError(409, 'INVALID_TRANSITION', `Can't do that on a ${what} in status ${status.toLowerCase().replace(/_/g, ' ')}`);
+  return new AppError(
+    409,
+    'INVALID_TRANSITION',
+    `Can't do that on a ${what} in status ${status.toLowerCase().replace(/_/g, ' ')}`,
+  );
 }
 
 // ---------- place ----------
@@ -181,7 +218,11 @@ export async function placeOperation(user: AuthUser, input: PlaceOperationInput)
         const done = 'deliveredQty' in line ? line.deliveredQty : line.receivedQty;
         const remaining = line.quantity.minus(done).minus(pending.get(lineId) ?? ZERO);
         if (q.greaterThan(remaining)) {
-          throw new AppError(409, 'QTY_EXCEEDS_REMAINING', `Only ${remaining.toString()} left to ${isSale ? 'deliver' : 'receive'} on that line (including pending operations)`);
+          throw new AppError(
+            409,
+            'QTY_EXCEEDS_REMAINING',
+            `Only ${remaining.toString()} left to ${isSale ? 'deliver' : 'receive'} on that line (including pending operations)`,
+          );
         }
         opLines.push({
           product: { connect: { id: line.productId } },
@@ -214,13 +255,22 @@ export async function placeOperation(user: AuthUser, input: PlaceOperationInput)
     } else {
       const product = await tx.product.findUnique({ where: { id: input.productId } });
       if (!product) throw notFound('Product');
-      data = { ...base, reference: await nextRef(tx, 'OP'), productId: product.id, targetQty: input.targetQty, reason: input.reason };
+      data = {
+        ...base,
+        reference: await nextRef(tx, 'OP'),
+        productId: product.id,
+        targetQty: input.targetQty,
+        reason: input.reason,
+      };
     }
 
     const op = await tx.stockOperation.create({ data });
     await logAudit(tx, opBase(user, op), 'CREATE', { note: `${op.type} placed` });
     if (orderAudit) {
-      await logAudit(tx, orderAudit, 'UPDATE', { field: 'stockOperation', newValue: `${op.reference} placed (${op.type.toLowerCase()})` });
+      await logAudit(tx, orderAudit, 'UPDATE', {
+        field: 'stockOperation',
+        newValue: `${op.reference} placed (${op.type.toLowerCase()})`,
+      });
     }
     return loadDto(tx, op.id);
   });
@@ -252,12 +302,24 @@ export async function confirmOperation(user: AuthUser, id: number): Promise<Oper
     if (op.type === 'DELIVERY' && op.salesOrderId) {
       const so = await tx.salesOrder.findUniqueOrThrow({ where: { id: op.salesOrderId } });
       if (so.status === 'CANCELLED') throw new AppError(409, 'OPERATION_CLOSED', `${so.reference} was cancelled`);
-      await postMoves(tx, op.lines.map((l) => ({ ...mv, productId: l.productId, quantity: l.quantity.negated(), type: 'DELIVERY' as const })));
+      await postMoves(
+        tx,
+        op.lines.map((l) => ({ ...mv, productId: l.productId, quantity: l.quantity.negated(), type: 'DELIVERY' as const })),
+      );
       for (const l of op.lines) {
-        if (l.salesOrderLineId) await tx.salesOrderLine.update({ where: { id: l.salesOrderLineId }, data: { deliveredQty: { increment: l.quantity } } });
+        if (l.salesOrderLineId)
+          await tx.salesOrderLine.update({
+            where: { id: l.salesOrderLineId },
+            data: { deliveredQty: { increment: l.quantity } },
+          });
       }
       const lines = await tx.salesOrderLine.findMany({ where: { orderId: so.id } });
-      const next = progressStatus(lines.map((l) => ({ quantity: l.quantity, done: l.deliveredQty })), so.status, 'PARTIALLY_DELIVERED', 'FULLY_DELIVERED');
+      const next = progressStatus(
+        lines.map((l) => ({ quantity: l.quantity, done: l.deliveredQty })),
+        so.status,
+        'PARTIALLY_DELIVERED',
+        'FULLY_DELIVERED',
+      );
       if (next !== so.status) {
         await tx.salesOrder.update({ where: { id: so.id }, data: { status: next } });
         await logStatus(tx, orderBase.sales(user, so), so.status, next, `${op.reference} confirmed`);
@@ -265,21 +327,42 @@ export async function confirmOperation(user: AuthUser, id: number): Promise<Oper
     } else if (op.type === 'RECEIPT' && op.purchaseOrderId) {
       const po = await tx.purchaseOrder.findUniqueOrThrow({ where: { id: op.purchaseOrderId } });
       if (po.status === 'CANCELLED') throw new AppError(409, 'OPERATION_CLOSED', `${po.reference} was cancelled`);
-      await postMoves(tx, op.lines.map((l) => ({ ...mv, productId: l.productId, quantity: l.quantity, type: 'RECEIPT' as const })));
+      await postMoves(
+        tx,
+        op.lines.map((l) => ({ ...mv, productId: l.productId, quantity: l.quantity, type: 'RECEIPT' as const })),
+      );
       for (const l of op.lines) {
-        if (l.purchaseOrderLineId) await tx.purchaseOrderLine.update({ where: { id: l.purchaseOrderLineId }, data: { receivedQty: { increment: l.quantity } } });
+        if (l.purchaseOrderLineId)
+          await tx.purchaseOrderLine.update({
+            where: { id: l.purchaseOrderLineId },
+            data: { receivedQty: { increment: l.quantity } },
+          });
       }
       const lines = await tx.purchaseOrderLine.findMany({ where: { orderId: po.id } });
-      const next = progressStatus(lines.map((l) => ({ quantity: l.quantity, done: l.receivedQty })), po.status, 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED');
+      const next = progressStatus(
+        lines.map((l) => ({ quantity: l.quantity, done: l.receivedQty })),
+        po.status,
+        'PARTIALLY_RECEIVED',
+        'FULLY_RECEIVED',
+      );
       if (next !== po.status) {
         await tx.purchaseOrder.update({ where: { id: po.id }, data: { status: next } });
         await logStatus(tx, orderBase.purchase(user, po), po.status, next, `${op.reference} confirmed`);
       }
     } else if (op.type === 'PRODUCTION' && op.manufacturingOrderId) {
-      const mo = await tx.manufacturingOrder.findUniqueOrThrow({ where: { id: op.manufacturingOrderId }, include: { components: true } });
-      if (mo.status === 'CANCELLED' || mo.status === 'DONE') throw new AppError(409, 'OPERATION_CLOSED', `${mo.reference} is ${mo.status.toLowerCase()}`);
+      const mo = await tx.manufacturingOrder.findUniqueOrThrow({
+        where: { id: op.manufacturingOrderId },
+        include: { components: true },
+      });
+      if (mo.status === 'CANCELLED' || mo.status === 'DONE')
+        throw new AppError(409, 'OPERATION_CLOSED', `${mo.reference} is ${mo.status.toLowerCase()}`);
       await postMoves(tx, [
-        ...mo.components.map((c) => ({ ...mv, productId: c.productId, quantity: c.toConsume.minus(c.consumed).negated(), type: 'MO_CONSUME' as const })),
+        ...mo.components.map((c) => ({
+          ...mv,
+          productId: c.productId,
+          quantity: c.toConsume.minus(c.consumed).negated(),
+          type: 'MO_CONSUME' as const,
+        })),
         { ...mv, productId: mo.productId, quantity: mo.quantity, type: 'MO_PRODUCE' as const },
       ]);
       for (const c of mo.components) await tx.moComponent.update({ where: { id: c.id }, data: { consumed: c.toConsume } });
@@ -301,7 +384,10 @@ export async function confirmOperation(user: AuthUser, id: number): Promise<Oper
 export async function rejectOperation(user: AuthUser, id: number, reason: string): Promise<OperationDTO> {
   return transaction(async (tx) => {
     const op = await lockForDecision(tx, user, id);
-    await tx.stockOperation.update({ where: { id }, data: { status: 'REJECTED', rejectReason: reason, decidedById: user.id, decidedAt: new Date() } });
+    await tx.stockOperation.update({
+      where: { id },
+      data: { status: 'REJECTED', rejectReason: reason, decidedById: user.id, decidedAt: new Date() },
+    });
     await logStatus(tx, opBase(user, op), 'PLACED', 'REJECTED', reason);
     return loadDto(tx, id);
   });
@@ -330,7 +416,9 @@ export const operationQuerySchema = z.object({
 
 /** Types whose module the user can view (adjustments: Products). */
 export function visibleTypes(user: AuthUser): OperationType[] {
-  return (['DELIVERY', 'RECEIPT', 'PRODUCTION', 'ADJUSTMENT'] as OperationType[]).filter((t) => can(user, operationModule(t), 'view'));
+  return (['DELIVERY', 'RECEIPT', 'PRODUCTION', 'ADJUSTMENT'] as OperationType[]).filter((t) =>
+    can(user, operationModule(t), 'view'),
+  );
 }
 
 export async function listOperations(user: AuthUser, q: z.infer<typeof operationQuerySchema>) {

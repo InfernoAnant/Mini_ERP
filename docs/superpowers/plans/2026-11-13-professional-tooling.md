@@ -11,6 +11,7 @@
 **Spec:** `docs/superpowers/specs/2026-11-13-professional-tooling-design.md`
 
 ## Global Constraints
+
 - Approved root devDependencies (exact): `eslint@9.17.0 @eslint/js@9.17.0 typescript-eslint@8.18.2 eslint-plugin-react-hooks@5.1.0 eslint-plugin-react-refresh@0.4.16 globals@15.14.0 eslint-config-prettier@9.1.0 prettier@3.4.2 husky@9.1.7 lint-staged@15.2.11 @playwright/test@1.49.1`. Playwright's Chromium download is approved.
 - Docker base images: `node:22-bookworm-slim`, `nginx:1.27-alpine`, `postgres:17-alpine`.
 - CI Node: 22.12.0. `.nvmrc`: `22.12.0`.
@@ -19,6 +20,7 @@
 - Commits end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 
 ## Review Focus
+
 1. **The reformat commit changes behavior:** the full server suite and client build must pass right after the `style:` commit. → Task 1.
 2. **The Docker API image misses Prisma's engine for Debian:** `binaryTargets` must include `debian-openssl-3.0.x`. → Task 2, checked in CI with `docker compose build`.
 3. **`AUTO_SEED` re-seeds a non-empty DB:** it must only seed when the user count is 0. → Task 2 unit test.
@@ -28,7 +30,9 @@
 ---
 
 ### Task 1: Node pin, ESLint, Prettier, hooks
+
 **Files:** Create `package.json` (root: name `mini-erp`, private, scripts `lint`, `format`, `format:check`, `typecheck`, `test`, `test:e2e`, `prepare: husky`), `eslint.config.js`, `.prettierrc.json`, `.prettierignore`, `.editorconfig`, `.nvmrc`, `.husky/pre-commit` (`npx lint-staged`), with `lint-staged` set to `{"*.{ts,tsx,js}": ["eslint --fix", "prettier --write"], "*.{json,md,yml,css}": ["prettier --write"]}`. Modify `client/package.json` engines `">=20 <23"`, `.gitignore` (`client/tsconfig.tsbuildinfo`, `test-results/`, `playwright-report/`) and untrack `client/tsconfig.tsbuildinfo`.
+
 - ESLint: `@eslint/js` recommended plus `typescript-eslint` recommended for `**/*.{ts,tsx}`; react-hooks and react-refresh for `client/src`; Node globals for `server`; `@typescript-eslint/no-explicit-any: error`; `no-unused-vars` via TS with `argsIgnorePattern: '^_'`; ignores `**/dist`, `**/node_modules`, `venv`, `server/prisma/migrations`; `eslint-config-prettier` last.
 - [ ] Step 1: Install the root devDeps (exact list). Expected: success.
 - [ ] Step 2: `npx eslint .`. Fix every error without changing behavior (ledger each rule disabled inline, with its reason).
@@ -37,7 +41,9 @@
 - [ ] Step 5: Commit `chore: eslint, prettier, husky, node 22 pin`, then commit the reformat separately as `style: format codebase with prettier`.
 
 ### Task 2: Docker and auto-seed
+
 **Files:** Create `server/Dockerfile`, `client/Dockerfile`, `client/nginx.conf`, `docker-compose.yml`, `.dockerignore` (in each app). Modify `server/src/index.ts` (call `maybeAutoSeed()` before `listen`), `server/prisma/schema.prisma` (`binaryTargets = ["native", "debian-openssl-3.0.x"]`), `.env.example` (`AUTO_SEED`). Test `server/test/autoseed.test.ts`.
+
 - Produces: `maybeAutoSeed(): Promise<boolean>` in `server/src/services/demo.service.ts`. It seeds only when `process.env.AUTO_SEED === 'true'` and `prisma.user.count() === 0`, and returns whether it seeded.
 - API image: build stage (`npm ci`, `prisma generate`, `tsc -p tsconfig.build.json`), runtime stage (production deps plus `node_modules/.prisma`, `dist`, `prisma/`). `CMD npx prisma migrate deploy && node dist/src/index.js`. Exposes 5000.
 - Web image: Node build of the client, then `nginx:1.27-alpine` serving `dist` with an SPA fallback and `location /api/ { proxy_pass http://api:5000; }`. Exposes 80.
@@ -49,7 +55,9 @@
 - [ ] Step 4: Commit `build: docker compose for db, api and web`.
 
 ### Task 3: Playwright e2e
+
 **Files:** Create `playwright.config.ts` (root), `e2e/demo-flow.spec.ts`, `e2e/roles.spec.ts`, `e2e/helpers.ts`, `e2e/screenshots.spec.ts` (tagged `@screens`, writes `docs/screenshots/*.png`, excluded by default via `grepInvert`).
+
 - Config: `testDir: 'e2e'`, `use.baseURL: 'http://localhost:5173'`, Chromium only, `retries: process.env.CI ? 1 : 0`, `webServer` entries for `npm --prefix server run dev` (url `/api/health` on 5000) and `npm --prefix client run dev` (5173), `reuseExistingServer: !process.env.CI`.
 - Helpers: `resetDemo(request)` (POST `/api/demo/reset`, tolerates 429 by waiting 16s and retrying once), `loginAs(page, role)` (clicks the demo button), `logout(page)`.
 - `demo-flow.spec.ts`: the full flow through the UI (same steps as the live demo). It asserts, using role/text locators:
@@ -69,7 +77,9 @@
 - [ ] Step 4: Commit `test(e2e): playwright demo flow, roles and screenshots`.
 
 ### Task 4: GitHub Actions CI
+
 **Files:** Create `.github/workflows/ci.yml`, `.github/dependabot.yml` (npm weekly for `/`, `/server` and `/client`; github-actions monthly).
+
 - Jobs (all `ubuntu-latest`, `actions/setup-node@v4` with `node-version-file: .nvmrc` and npm cache):
   - `lint`: root `npm ci`, `npm run lint`, `npm run format:check`, server and client typecheck.
   - `test-server`: Postgres 17 service, write `server/.env.test`, `npm ci`, `npx vitest run` (no Windows retry wrapper needed).
@@ -80,7 +90,9 @@
 - [ ] Step 2: Commit `ci: github actions for lint, tests, e2e and docker`.
 
 ### Task 5: README and finish
+
 **Files:** Modify `README.md`: CI badge (`https://github.com/InfernoAnant/Mini_ERP/actions/workflows/ci.yml/badge.svg`), screenshots section, "Run with Docker" (`docker compose up --build`, then open http://localhost:8080), "Development" (Node 22 via `.nvmrc`, `npm run lint`/`test`/`test:e2e`), and the updated test counts.
+
 - [ ] Step 1: Edit the README. Run `npm run format:check`.
 - [ ] Step 2: Commit `docs: readme badge, screenshots and docker instructions`.
 - [ ] Step 3: Final review (fresh reviewer), with a fix pass if needed.

@@ -40,13 +40,21 @@ export function UserListPage() {
                 <td className="td font-medium">
                   {u.name}
                   {u.isDemoLocked && <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">demo</span>}
-                  {u.readOnly && <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">read-only</span>}
+                  {u.readOnly && (
+                    <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">read-only</span>
+                  )}
                 </td>
                 <td className="td">{u.loginId}</td>
                 <td className="td">{u.position ?? '—'}</td>
                 {MODULES.map((m) => (
                   <td key={m} className="td">
-                    <span className={u.access[m] === 'ADMIN' ? 'font-medium text-indigo-700' : u.access[m] === 'NONE' ? 'text-slate-400' : ''}>{label(u.access[m])}</span>
+                    <span
+                      className={
+                        u.access[m] === 'ADMIN' ? 'font-medium text-indigo-700' : u.access[m] === 'NONE' ? 'text-slate-400' : ''
+                      }
+                    >
+                      {label(u.access[m])}
+                    </span>
                   </td>
                 ))}
               </tr>
@@ -69,7 +77,13 @@ export function UserFormPage() {
 
   useEffect(() => {
     if (!u) return;
-    setProfile({ name: u.name, address: u.address ?? '', mobile: u.mobile ?? '', position: u.position ?? '', readOnly: u.readOnly });
+    setProfile({
+      name: u.name,
+      address: u.address ?? '',
+      mobile: u.mobile ?? '',
+      position: u.position ?? '',
+      readOnly: u.readOnly,
+    });
     setAccess(u.access);
   }, [u]);
 
@@ -80,7 +94,13 @@ export function UserFormPage() {
     e.preventDefault();
     setSaved(null);
     const res = await action.run(() =>
-      api.patch<UserDTO>(`/users/${id}`, { name: profile.name, address: profile.address || null, mobile: profile.mobile || null, position: profile.position || null, readOnly: profile.readOnly }),
+      api.patch<UserDTO>(`/users/${id}`, {
+        name: profile.name,
+        address: profile.address || null,
+        mobile: profile.mobile || null,
+        position: profile.position || null,
+        readOnly: profile.readOnly,
+      }),
     );
     if (res) {
       user.setData(res);
@@ -112,11 +132,21 @@ export function UserFormPage() {
       </PageHeader>
       <ErrorBanner message={action.error} onClose={() => action.setError(null)} />
       {saved && <Notice tone="success">{saved}</Notice>}
-      {locked && <Notice tone="warn">This is a shared demo account — its position, read-only flag and access can't be changed. Sign up a new user to try access control.</Notice>}
+      {locked && (
+        <Notice tone="warn">
+          This is a shared demo account — its position, read-only flag and access can't be changed. Sign up a new user to try
+          access control.
+        </Notice>
+      )}
 
       <form onSubmit={saveProfile} className="card mb-4 grid gap-3 p-5 sm:grid-cols-2">
         <Field label="Name">
-          <input className="input" value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} required />
+          <input
+            className="input"
+            value={profile.name}
+            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+            required
+          />
         </Field>
         <Field label="Login Id">
           <input className="input" value={u.loginId} disabled />
@@ -125,16 +155,30 @@ export function UserFormPage() {
           <input className="input" value={u.email} disabled />
         </Field>
         <Field label="Position (only the administrator can change this)">
-          <input className="input" value={profile.position} disabled={locked} onChange={(e) => setProfile({ ...profile, position: e.target.value })} />
+          <input
+            className="input"
+            value={profile.position}
+            disabled={locked}
+            onChange={(e) => setProfile({ ...profile, position: e.target.value })}
+          />
         </Field>
         <Field label="Address">
-          <input className="input" value={profile.address} onChange={(e) => setProfile({ ...profile, address: e.target.value })} />
+          <input
+            className="input"
+            value={profile.address}
+            onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+          />
         </Field>
         <Field label="Mobile">
           <input className="input" value={profile.mobile} onChange={(e) => setProfile({ ...profile, mobile: e.target.value })} />
         </Field>
         <label className="flex items-center gap-2 text-sm sm:col-span-2">
-          <input type="checkbox" checked={profile.readOnly} disabled={locked || u.isSystemAdmin} onChange={(e) => setProfile({ ...profile, readOnly: e.target.checked })} />
+          <input
+            type="checkbox"
+            checked={profile.readOnly}
+            disabled={locked || u.isSystemAdmin}
+            onChange={(e) => setProfile({ ...profile, readOnly: e.target.checked })}
+          />
           Read-only (can view the modules below but not change anything — e.g. business owner)
         </label>
         <div>
@@ -168,7 +212,14 @@ export function UserFormPage() {
                       <td className="td font-medium">{label(m)}</td>
                       {LEVELS.map((l) => (
                         <td key={l} className="td text-center">
-                          <input type="radio" name={m} aria-label={`${m} ${l}`} checked={access[m] === l} disabled={locked} onChange={() => setAccess({ ...access, [m]: l })} />
+                          <input
+                            type="radio"
+                            name={m}
+                            aria-label={`${m} ${l}`}
+                            checked={access[m] === l}
+                            disabled={locked}
+                            onChange={() => setAccess({ ...access, [m]: l })}
+                          />
                         </td>
                       ))}
                     </tr>

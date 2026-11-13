@@ -67,10 +67,23 @@ export default function LoginPage() {
           </div>
           <ErrorBanner message={error} onClose={() => setError(null)} />
           <Field label="Login Id" className="mb-3">
-            <input className="input" value={loginId} onChange={(e) => setLoginId(e.target.value)} autoComplete="username" required />
+            <input
+              className="input"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
+              autoComplete="username"
+              required
+            />
           </Field>
           <Field label="Password" className="mb-4">
-            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+            <input
+              className="input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
           </Field>
           <button type="submit" className="btn-primary w-full justify-center" disabled={busy !== null}>
             {busy === 'form' ? 'Signing in…' : 'Sign in'}
@@ -108,7 +121,12 @@ export default function LoginPage() {
               </button>
             ))}
           </div>
-          <button type="button" className="mt-4 text-sm text-slate-500 underline hover:text-slate-700" disabled={busy !== null} onClick={reset}>
+          <button
+            type="button"
+            className="mt-4 text-sm text-slate-500 underline hover:text-slate-700"
+            disabled={busy !== null}
+            onClick={reset}
+          >
             {busy === 'reset' ? 'Resetting demo data…' : 'Reset demo data'}
           </button>
         </div>

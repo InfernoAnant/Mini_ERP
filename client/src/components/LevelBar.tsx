@@ -5,16 +5,31 @@ import EndConfetti from './EndConfetti';
 const fillOf = (percent: number, i: number) => Math.max(0, Math.min(1, (percent - 25 * i) / 25));
 
 /** Game-style level bar. `lg` on order pages (4 labelled segments), `sm` in lists and kanban. */
-export default function LevelBar({ progress, size, celebrate = false, onCelebrated }: { progress: Progress; size: 'lg' | 'sm'; celebrate?: boolean; onCelebrated?: () => void }) {
+export default function LevelBar({
+  progress,
+  size,
+  celebrate = false,
+  onCelebrated,
+}: {
+  progress: Progress;
+  size: 'lg' | 'sm';
+  celebrate?: boolean;
+  onCelebrated?: () => void;
+}) {
   const tone = progress.cancelled ? 'bg-slate-300' : progress.complete ? 'bg-emerald-500' : 'bg-indigo-600';
 
   if (size === 'sm') {
     return (
-      <div className="flex min-w-[7rem] items-center gap-2" title={progress.cancelled ? 'Cancelled' : `${progress.stage} · ${progress.percent}%`}>
+      <div
+        className="flex min-w-[7rem] items-center gap-2"
+        title={progress.cancelled ? 'Cancelled' : `${progress.stage} · ${progress.percent}%`}
+      >
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">
           <div className={`h-full rounded-full ${tone}`} style={{ width: `${progress.cancelled ? 100 : progress.percent}%` }} />
         </div>
-        <span className="w-9 text-right text-xs tabular-nums text-slate-500">{progress.cancelled ? '—' : `${progress.percent}%`}</span>
+        <span className="w-9 text-right text-xs tabular-nums text-slate-500">
+          {progress.cancelled ? '—' : `${progress.percent}%`}
+        </span>
       </div>
     );
   }
@@ -23,7 +38,11 @@ export default function LevelBar({ progress, size, celebrate = false, onCelebrat
     <div className="card mb-4 px-5 py-4" aria-label={`Progress: ${progress.stage}, ${progress.percent}%`}>
       <div className="mb-2 flex items-baseline justify-between gap-3">
         <span className="text-sm font-semibold text-slate-800">
-          {progress.cancelled ? 'Cancelled' : progress.complete ? 'Complete! 🎉' : `Level ${progress.level} of 4 · ${progress.stage}`}
+          {progress.cancelled
+            ? 'Cancelled'
+            : progress.complete
+              ? 'Complete! 🎉'
+              : `Level ${progress.level} of 4 · ${progress.stage}`}
         </span>
         <span className={`text-sm font-semibold tabular-nums ${progress.complete ? 'text-emerald-600' : 'text-indigo-700'}`}>
           {progress.cancelled ? '' : `${progress.percent}%`}
@@ -36,8 +55,13 @@ export default function LevelBar({ progress, size, celebrate = false, onCelebrat
           return (
             <div key={stage}>
               <div className="relative">
-                <div className={`h-3 overflow-hidden rounded-full ${progress.cancelled ? 'bg-slate-200' : 'bg-slate-100'} ring-1 ring-inset ring-slate-200`}>
-                  <div className={`h-full rounded-full transition-[width] duration-700 ease-out ${tone}`} style={{ width: `${fill * 100}%` }} />
+                <div
+                  className={`h-3 overflow-hidden rounded-full ${progress.cancelled ? 'bg-slate-200' : 'bg-slate-100'} ring-1 ring-inset ring-slate-200`}
+                >
+                  <div
+                    className={`h-full rounded-full transition-[width] duration-700 ease-out ${tone}`}
+                    style={{ width: `${fill * 100}%` }}
+                  />
                 </div>
                 {last && celebrate && <EndConfetti onDone={() => onCelebrated?.()} />}
               </div>

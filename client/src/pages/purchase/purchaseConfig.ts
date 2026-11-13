@@ -45,7 +45,13 @@ export const purchaseConfig: OrderConfig<PurchaseOrderDTO> = {
   }),
   toBody: (form, lines) => {
     const b = headerBody(form, lines);
-    return { vendorId: Number(form.partnerId), vendorAddress: b.address, responsibleId: b.person, expectedDate: b.date, lines: b.lines };
+    return {
+      vendorId: Number(form.partnerId),
+      vendorAddress: b.address,
+      responsibleId: b.person,
+      expectedDate: b.date,
+      lines: b.lines,
+    };
   },
   operationBody: (order, q) => ({ type: 'RECEIPT', purchaseOrderId: order.id, lines: opLines(q, 'purchaseOrderLineId') }),
 };

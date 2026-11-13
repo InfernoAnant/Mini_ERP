@@ -13,7 +13,14 @@ export const profileSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   address: z.string().trim().max(300).nullable().optional(),
   mobile: z.string().trim().max(30).nullable().optional(),
-  photoUrl: z.string().trim().url().max(500).nullable().optional().or(z.literal('').transform(() => null)),
+  photoUrl: z
+    .string()
+    .trim()
+    .url()
+    .max(500)
+    .nullable()
+    .optional()
+    .or(z.literal('').transform(() => null)),
 });
 export const adminUserSchema = profileSchema.extend({
   position: z.string().trim().max(80).nullable().optional(),

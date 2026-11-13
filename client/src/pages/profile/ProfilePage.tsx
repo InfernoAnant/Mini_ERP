@@ -23,7 +23,12 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaved(false);
     const ok = await action.run(() =>
-      api.patch<UserDTO>('/users/me', { name: form.name, address: form.address || null, mobile: form.mobile || null, photoUrl: form.photoUrl || null }),
+      api.patch<UserDTO>('/users/me', {
+        name: form.name,
+        address: form.address || null,
+        mobile: form.mobile || null,
+        photoUrl: form.photoUrl || null,
+      }),
     );
     if (ok) {
       setSaved(true);
@@ -63,7 +68,11 @@ export default function ProfilePage() {
           </div>
         </div>
         <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50 text-3xl font-semibold text-slate-400">
-          {form.photoUrl ? <img src={form.photoUrl} alt="Profile" className="h-full w-full object-cover" /> : data.name.slice(0, 1)}
+          {form.photoUrl ? (
+            <img src={form.photoUrl} alt="Profile" className="h-full w-full object-cover" />
+          ) : (
+            data.name.slice(0, 1)
+          )}
         </div>
       </form>
     </div>

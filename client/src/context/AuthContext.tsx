@@ -12,7 +12,12 @@ const MATRIX: Record<Module, { ADMIN: Action[]; USER: Action[] }> = {
   BOM: { ADMIN: ['view', 'create', 'edit', 'delete'], USER: ['view'] },
   PRODUCTS: { ADMIN: ['view', 'create', 'edit', 'delete', 'adjust'], USER: ['view', 'create', 'edit'] },
 };
-const OP_MODULE: Record<OperationType, Module> = { DELIVERY: 'SALES', RECEIPT: 'PURCHASE', PRODUCTION: 'MANUFACTURING', ADJUSTMENT: 'PRODUCTS' };
+const OP_MODULE: Record<OperationType, Module> = {
+  DELIVERY: 'SALES',
+  RECEIPT: 'PURCHASE',
+  PRODUCTION: 'MANUFACTURING',
+  ADJUSTMENT: 'PRODUCTS',
+};
 
 export function canUser(user: AuthUser | null, module: Module, action: Action): boolean {
   if (!user) return false;
@@ -74,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       loading,
       refresh,
-      login: async (loginId, password) => setUser((await api.post<{ user: AuthUser }>('/auth/login', { loginId, password })).user),
+      login: async (loginId, password) =>
+        setUser((await api.post<{ user: AuthUser }>('/auth/login', { loginId, password })).user),
       demoLogin: async (loginId) => setUser((await api.post<{ user: AuthUser }>('/auth/demo-login', { loginId })).user),
       signup: async (input) => setUser((await api.post<{ user: AuthUser }>('/auth/signup', input)).user),
       logout: async () => {

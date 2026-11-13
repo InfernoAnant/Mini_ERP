@@ -20,7 +20,10 @@ function Tile({ title, value, sub, tone }: { title: string; value: number; sub: 
 export default function AuditPage() {
   const [params, setParams] = useSearchParams();
   const q = Object.fromEntries(params.entries());
-  const { data, error } = useLoad(() => api.get<AuditPageDTO>('/audit', { ...q, to: q.to ? `${q.to}T23:59:59` : undefined }), [params.toString()]);
+  const { data, error } = useLoad(
+    () => api.get<AuditPageDTO>('/audit', { ...q, to: q.to ? `${q.to}T23:59:59` : undefined }),
+    [params.toString()],
+  );
   const users = useLoad(() => api.get<Ref[]>('/users/options'), []);
   const set = (k: string, v: string) => {
     const next = new URLSearchParams(params);
@@ -50,9 +53,26 @@ export default function AuditPage() {
         </div>
       )}
       <div className="card mb-4 grid gap-2 p-3 sm:grid-cols-3 lg:grid-cols-6">
-        <input className="input" type="date" aria-label="From" value={params.get('from') ?? ''} onChange={(e) => set('from', e.target.value)} />
-        <input className="input" type="date" aria-label="To" value={params.get('to') ?? ''} onChange={(e) => set('to', e.target.value)} />
-        <select className="input" aria-label="User" value={params.get('userId') ?? ''} onChange={(e) => set('userId', e.target.value)}>
+        <input
+          className="input"
+          type="date"
+          aria-label="From"
+          value={params.get('from') ?? ''}
+          onChange={(e) => set('from', e.target.value)}
+        />
+        <input
+          className="input"
+          type="date"
+          aria-label="To"
+          value={params.get('to') ?? ''}
+          onChange={(e) => set('to', e.target.value)}
+        />
+        <select
+          className="input"
+          aria-label="User"
+          value={params.get('userId') ?? ''}
+          onChange={(e) => set('userId', e.target.value)}
+        >
           <option value="">All users</option>
           {users.data?.map((u) => (
             <option key={u.id} value={u.id}>
@@ -60,7 +80,12 @@ export default function AuditPage() {
             </option>
           ))}
         </select>
-        <select className="input" aria-label="Module" value={params.get('module') ?? ''} onChange={(e) => set('module', e.target.value)}>
+        <select
+          className="input"
+          aria-label="Module"
+          value={params.get('module') ?? ''}
+          onChange={(e) => set('module', e.target.value)}
+        >
           <option value="">All modules</option>
           {MODULES.map((m) => (
             <option key={m} value={m}>
@@ -68,7 +93,12 @@ export default function AuditPage() {
             </option>
           ))}
         </select>
-        <select className="input" aria-label="Action" value={params.get('action') ?? ''} onChange={(e) => set('action', e.target.value)}>
+        <select
+          className="input"
+          aria-label="Action"
+          value={params.get('action') ?? ''}
+          onChange={(e) => set('action', e.target.value)}
+        >
           <option value="">All actions</option>
           {ACTIONS.map((a) => (
             <option key={a} value={a}>
@@ -93,7 +123,18 @@ export default function AuditPage() {
             <table className="min-w-full divide-y divide-slate-200">
               <thead className="bg-slate-50">
                 <tr>
-                  {['Date & time', 'User', 'Module', 'Record type', 'Record', 'Action', 'Field', 'Old value', 'New value', 'Note'].map((h) => (
+                  {[
+                    'Date & time',
+                    'User',
+                    'Module',
+                    'Record type',
+                    'Record',
+                    'Action',
+                    'Field',
+                    'Old value',
+                    'New value',
+                    'Note',
+                  ].map((h) => (
                     <th key={h} className="th whitespace-nowrap">
                       {h}
                     </th>

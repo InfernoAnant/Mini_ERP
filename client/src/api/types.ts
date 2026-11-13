@@ -10,7 +10,14 @@ export type MoStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'TO_CLOSE' | 'DON
 
 export type Ref = { id: number; name: string };
 
-export type Progress = { level: 0 | 1 | 2 | 3 | 4; percent: number; stage: string; stages: string[]; cancelled: boolean; complete: boolean };
+export type Progress = {
+  level: 0 | 1 | 2 | 3 | 4;
+  percent: number;
+  stage: string;
+  stages: string[];
+  cancelled: boolean;
+  complete: boolean;
+};
 export type JourneyNode = {
   kind: 'SO' | 'PO' | 'MO';
   id: number;
@@ -172,8 +179,24 @@ export type MoDTO = {
   origin: string | null;
   createdAt: string;
   late: boolean;
-  components: { id: number; productId: number; productName: string; unit: string; toConsume: number; consumed: number; available: boolean }[];
-  workOrders: { id: number; sequence: number; name: string; workCenter: Ref; expectedMinutes: number; realMinutes: number | null; status: 'PENDING' | 'DONE' }[];
+  components: {
+    id: number;
+    productId: number;
+    productName: string;
+    unit: string;
+    toConsume: number;
+    consumed: number;
+    available: boolean;
+  }[];
+  workOrders: {
+    id: number;
+    sequence: number;
+    name: string;
+    workCenter: Ref;
+    expectedMinutes: number;
+    realMinutes: number | null;
+    status: 'PENDING' | 'DONE';
+  }[];
   operations: OperationDTO[];
   progress: Progress;
 };

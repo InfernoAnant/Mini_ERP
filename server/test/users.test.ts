@@ -26,7 +26,9 @@ describe('users administration', () => {
   it('user can edit own profile but not position or email', async () => {
     const user = await makeUser({ access: { SALES: 'USER' } });
     const agent = await agentFor(user);
-    const res = await agent.patch('/api/users/me').send({ name: 'Amit Sharma', mobile: '+91 98000 00000', position: 'CEO', email: 'x@y.z' });
+    const res = await agent
+      .patch('/api/users/me')
+      .send({ name: 'Amit Sharma', mobile: '+91 98000 00000', position: 'CEO', email: 'x@y.z' });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ name: 'Amit Sharma', mobile: '+91 98000 00000', position: null, email: user.email });
   });

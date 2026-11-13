@@ -122,9 +122,15 @@ export async function createProduct(user: AuthUser, input: CreateProductInput): 
         createdById: user.id,
       },
     });
-    await logAudit(tx, { userId: user.id, module: 'PRODUCTS', recordType: 'Product', recordId: p.id, reference: p.name }, 'CREATE');
+    await logAudit(
+      tx,
+      { userId: user.id, module: 'PRODUCTS', recordType: 'Product', recordId: p.id, reference: p.name },
+      'CREATE',
+    );
     if (input.initialStock > 0) {
-      await postMoves(tx, [{ productId: p.id, quantity: dec(input.initialStock), type: 'ADJUSTMENT', reference: 'INITIAL', userId: user.id }]);
+      await postMoves(tx, [
+        { productId: p.id, quantity: dec(input.initialStock), type: 'ADJUSTMENT', reference: 'INITIAL', userId: user.id },
+      ]);
     }
     return getProduct(p.id, tx);
   });
@@ -173,7 +179,10 @@ export async function listProducts(
     prisma.product.findMany({ where, include, orderBy: { name: 'asc' }, ...paging(q) }),
     prisma.product.count({ where }),
   ]);
-  const levels = await getLevels(prisma, rows.map((r) => r.id));
+  const levels = await getLevels(
+    prisma,
+    rows.map((r) => r.id),
+  );
   return {
     items: rows.map((r) => toDto(r, levels.get(r.id)?.reserved ?? dec(0))),
     total,
@@ -189,7 +198,10 @@ export async function productOptions(user: AuthUser) {
     orderBy: { name: 'asc' },
     select: { id: true, name: true, unit: true, salesPrice: true, costPrice: true, onHand: true, defaultBomId: true },
   });
-  const levels = await getLevels(prisma, rows.map((r) => r.id));
+  const levels = await getLevels(
+    prisma,
+    rows.map((r) => r.id),
+  );
   return rows.map((r) => ({ ...r, free: levels.get(r.id)?.free ?? r.onHand }));
 }
 

@@ -75,7 +75,12 @@ export default function Layout() {
     <div className="min-h-screen">
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
         <div className="flex items-center gap-3">
-          <button type="button" className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <button
+            type="button"
+            className="rounded-md p-1.5 text-slate-600 hover:bg-slate-100 lg:hidden"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+          >
             ☰
           </button>
           <Link to="/" className="flex items-center gap-2 font-semibold text-slate-900">
@@ -107,7 +112,11 @@ export default function Layout() {
                 <Link to="/profile" className="block px-3 py-2 text-sm hover:bg-slate-50" onClick={() => setAvatarOpen(false)}>
                   My profile
                 </Link>
-                <button type="button" className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50 sm:hidden" onClick={() => setResetOpen(true)}>
+                <button
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-slate-50 sm:hidden"
+                  onClick={() => setResetOpen(true)}
+                >
                   Reset demo data
                 </button>
                 <button
@@ -127,7 +136,9 @@ export default function Layout() {
       </header>
 
       <div className="flex">
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r border-slate-200 bg-white lg:block">{nav}</aside>
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 border-r border-slate-200 bg-white lg:block">
+          {nav}
+        </aside>
         {menuOpen && (
           <div className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden" onClick={() => setMenuOpen(false)}>
             <aside className="h-full w-64 bg-white" onClick={(e) => e.stopPropagation()}>
@@ -167,7 +178,8 @@ export default function Layout() {
           }
         >
           <p className="text-sm text-slate-600">
-            Everyone shares this demo. Resetting restores the original Shiv Furniture data (products, orders and stock) so the demo script works from the start.
+            Everyone shares this demo. Resetting restores the original Shiv Furniture data (products, orders and stock) so the
+            demo script works from the start.
           </p>
           {resetMsg && <p className="mt-2 text-sm text-rose-700">{resetMsg}</p>}
         </Modal>

@@ -88,16 +88,18 @@ export async function makeContact(type: ContactType, name?: string): Promise<Con
 }
 
 /** Product with onHand set directly AND a matching ADJUSTMENT ledger row (keeps ledger == onHand). */
-export async function makeProduct(opts: {
-  name?: string;
-  onHand?: number | string;
-  salesPrice?: number;
-  costPrice?: number;
-  procureOnDemand?: boolean;
-  procurementType?: 'PURCHASE' | 'MANUFACTURING';
-  vendorId?: number;
-  createdById?: number;
-} = {}): Promise<Product> {
+export async function makeProduct(
+  opts: {
+    name?: string;
+    onHand?: number | string;
+    salesPrice?: number;
+    costPrice?: number;
+    procureOnDemand?: boolean;
+    procurementType?: 'PURCHASE' | 'MANUFACTURING';
+    vendorId?: number;
+    createdById?: number;
+  } = {},
+): Promise<Product> {
   fixtureCounter += 1;
   const onHand = String(opts.onHand ?? 0);
   const product = await prisma.product.create({
@@ -152,4 +154,3 @@ export async function tableWithBom(createdById: number) {
   });
   return { table, legs, top, screws, bom };
 }
-

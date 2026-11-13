@@ -18,7 +18,13 @@ describe('purchase orders', () => {
     const res = await agent.post('/api/purchase').send({ vendorId: vendor.id, lines: [{ productId: legs.id, quantity: 12 }] });
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({ reference: 'PO-000001', status: 'DRAFT', vendor: { name: 'Timber Traders' }, total: 1800 });
-    expect(res.body.lines[0]).toMatchObject({ productName: 'Wooden Legs', quantity: 12, unitCost: 150, receivedQty: 0, pendingQty: 0 });
+    expect(res.body.lines[0]).toMatchObject({
+      productName: 'Wooden Legs',
+      quantity: 12,
+      unitCost: 150,
+      receivedQty: 0,
+      pendingQty: 0,
+    });
   });
 
   it('purchase USER cannot confirm → 403', async () => {
@@ -66,7 +72,10 @@ describe('purchase orders', () => {
     const cancel = await agent.post(`/api/purchase/${po.body.id}/cancel`);
     expect(cancel.status).toBe(200);
     expect(cancel.body.status).toBe('CANCELLED');
-    const rows = await prisma.auditLog.findMany({ where: { module: 'PURCHASE', action: 'STATUS_CHANGE' }, orderBy: { id: 'asc' } });
+    const rows = await prisma.auditLog.findMany({
+      where: { module: 'PURCHASE', action: 'STATUS_CHANGE' },
+      orderBy: { id: 'asc' },
+    });
     expect(rows.map((r) => r.newValue)).toEqual(['CONFIRMED', 'CANCELLED']);
     expect((await agent.patch(`/api/purchase/${po.body.id}`).send({ vendorId: vendor.id, lines: [] })).status).toBe(400);
   });
@@ -74,8 +83,12 @@ describe('purchase orders', () => {
   it('list late=true returns only past-expected confirmed orders', async () => {
     const { vendor, legs, agent } = await setup();
     const past = new Date(Date.now() - 3 * 86400000).toISOString();
-    const a = await agent.post('/api/purchase').send({ vendorId: vendor.id, expectedDate: past, lines: [{ productId: legs.id, quantity: 1 }] });
-    await agent.post('/api/purchase').send({ vendorId: vendor.id, expectedDate: past, lines: [{ productId: legs.id, quantity: 1 }] });
+    const a = await agent
+      .post('/api/purchase')
+      .send({ vendorId: vendor.id, expectedDate: past, lines: [{ productId: legs.id, quantity: 1 }] });
+    await agent
+      .post('/api/purchase')
+      .send({ vendorId: vendor.id, expectedDate: past, lines: [{ productId: legs.id, quantity: 1 }] });
     await agent.post(`/api/purchase/${a.body.id}/confirm`);
     const res = await agent.get('/api/purchase').query({ late: 'true' });
     expect(res.body.items.map((i: { reference: string }) => i.reference)).toEqual([a.body.reference]);

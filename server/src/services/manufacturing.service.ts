@@ -42,12 +42,21 @@ export function isMoLate(mo: { deadline: Date | null; status: MoStatus }): boole
 }
 
 function base(user: AuthUser | null, mo: { id: number; reference: string }): AuditBase {
-  return { userId: user?.id ?? null, module: 'MANUFACTURING', recordType: 'ManufacturingOrder', recordId: mo.id, reference: mo.reference };
+  return {
+    userId: user?.id ?? null,
+    module: 'MANUFACTURING',
+    recordType: 'ManufacturingOrder',
+    recordId: mo.id,
+    reference: mo.reference,
+  };
 }
 
 async function toDto(db: Db, mo: MoRow) {
   const [levels, ref, operations] = await Promise.all([
-    getLevels(db, mo.components.map((c) => c.productId)),
+    getLevels(
+      db,
+      mo.components.map((c) => c.productId),
+    ),
     userRefs(db, [mo.assigneeId, mo.createdById]),
     operationsForOrder(db, { manufacturingOrderId: mo.id }),
   ]);
@@ -128,7 +137,11 @@ async function linesFromBom(db: Db, productId: number, bomId: number, quantity: 
 }
 
 /** Creates a Draft MO without permission checks (used by procurement and seeding). */
-export async function createDraftMoTx(tx: Tx, user: AuthUser, input: MoInput & { origin?: string }): Promise<{ id: number; reference: string }> {
+export async function createDraftMoTx(
+  tx: Tx,
+  user: AuthUser,
+  input: MoInput & { origin?: string },
+): Promise<{ id: number; reference: string }> {
   const qty = dec(input.quantity);
   const lines = await linesFromBom(tx, input.productId, input.bomId, qty);
   const reference = await nextRef(tx, 'MO');
@@ -200,7 +213,13 @@ export async function updateMo(user: AuthUser, id: number, input: MoUpdate): Pro
         await tx.workOrder.deleteMany({ where: { moId: id } });
         await tx.manufacturingOrder.update({
           where: { id },
-          data: { productId, bomId, quantity: qty, components: { create: lines.components }, workOrders: { create: lines.workOrders } },
+          data: {
+            productId,
+            bomId,
+            quantity: qty,
+            components: { create: lines.components },
+            workOrders: { create: lines.workOrders },
+          },
         });
       }
     } else if (MO_RESERVING.includes(before.status)) {
@@ -218,13 +237,26 @@ export async function updateMo(user: AuthUser, id: number, input: MoUpdate): Pro
         const ratio = newQty.dividedBy(before.quantity);
         const demands: { productId: number; quantity: Prisma.Decimal; freeBefore: Prisma.Decimal }[] = [];
         const increasing = newQty.greaterThan(before.quantity);
-        if (increasing) await lockProducts(tx, before.components.map((c) => c.productId));
-        const levels = increasing ? await getLevels(tx, before.components.map((c) => c.productId)) : null;
+        if (increasing)
+          await lockProducts(
+            tx,
+            before.components.map((c) => c.productId),
+          );
+        const levels = increasing
+          ? await getLevels(
+              tx,
+              before.components.map((c) => c.productId),
+            )
+          : null;
         for (const c of before.components) {
           const toConsume = c.toConsume.times(ratio).toDecimalPlaces(3);
           await tx.moComponent.update({ where: { id: c.id }, data: { toConsume } });
           if (levels && toConsume.greaterThan(c.toConsume)) {
-            demands.push({ productId: c.productId, quantity: toConsume.minus(c.toConsume), freeBefore: levels.get(c.productId)?.free ?? ZERO });
+            demands.push({
+              productId: c.productId,
+              quantity: toConsume.minus(c.toConsume),
+              freeBefore: levels.get(c.productId)?.free ?? ZERO,
+            });
           }
         }
         for (const w of before.workOrders) {
@@ -237,7 +269,11 @@ export async function updateMo(user: AuthUser, id: number, input: MoUpdate): Pro
         if (demands.length) procured = await procureComponents(tx, user, before.reference, demands);
       }
     } else {
-      throw new AppError(409, 'NOT_EDITABLE', `A ${before.status.toLowerCase().replace('_', ' ')} manufacturing order can't be edited`);
+      throw new AppError(
+        409,
+        'NOT_EDITABLE',
+        `A ${before.status.toLowerCase().replace('_', ' ')} manufacturing order can't be edited`,
+      );
     }
     const after = await tx.manufacturingOrder.update({
       where: { id },
@@ -258,15 +294,25 @@ export async function confirmMo(user: AuthUser, id: number): Promise<{ order: Mo
     const mo = await load(tx, id);
     if (mo.status !== 'DRAFT') throw invalidTransition('confirm', mo.status);
     // Free-to-use before this MO's own reservation takes effect (locked, so concurrent confirms can't both read it).
-    await lockProducts(tx, mo.components.map((c) => c.productId));
-    const levels = await getLevels(tx, mo.components.map((c) => c.productId));
+    await lockProducts(
+      tx,
+      mo.components.map((c) => c.productId),
+    );
+    const levels = await getLevels(
+      tx,
+      mo.components.map((c) => c.productId),
+    );
     await tx.manufacturingOrder.update({ where: { id }, data: { status: 'CONFIRMED' } });
     await logStatus(tx, base(user, mo), mo.status, 'CONFIRMED');
     const procured = await procureComponents(
       tx,
       user,
       mo.reference,
-      mo.components.map((c) => ({ productId: c.productId, quantity: c.toConsume, freeBefore: levels.get(c.productId)?.free ?? ZERO })),
+      mo.components.map((c) => ({
+        productId: c.productId,
+        quantity: c.toConsume,
+        freeBefore: levels.get(c.productId)?.free ?? ZERO,
+      })),
     );
     return { order: await toDto(tx, await load(tx, id)), procured };
   });

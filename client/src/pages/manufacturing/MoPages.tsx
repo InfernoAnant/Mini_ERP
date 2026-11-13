@@ -69,7 +69,10 @@ export function MoFormPage() {
   const people = useLoad(() => api.get<Ref[]>('/users/options'), []);
   const [form, setForm] = useState({ productId: '', quantity: '1', bomId: '', assigneeId: '', deadline: '' });
   const boms = useLoad(
-    () => (form.productId ? api.get<{ id: number; reference: string }[]>('/boms/options', { productId: form.productId }) : Promise.resolve([])),
+    () =>
+      form.productId
+        ? api.get<{ id: number; reference: string }[]>('/boms/options', { productId: form.productId })
+        : Promise.resolve([]),
     [form.productId],
   );
   const [editing, setEditing] = useState(false);
@@ -81,13 +84,19 @@ export function MoFormPage() {
   const party = useCelebration(m?.progress, `${m?.id ?? ''}`);
 
   const resetForm = (d: MoDTO) =>
-    setForm({ productId: String(d.product.id), quantity: String(d.quantity), bomId: String(d.bom.id), assigneeId: d.assignee ? String(d.assignee.id) : '', deadline: dateInput(d.deadline) });
+    setForm({
+      productId: String(d.product.id),
+      quantity: String(d.quantity),
+      bomId: String(d.bom.id),
+      assigneeId: d.assignee ? String(d.assignee.id) : '',
+      deadline: dateInput(d.deadline),
+    });
   useEffect(() => {
     if (m) resetForm(m);
   }, [m]);
   useEffect(() => {
     // Default to the product's own BoM when choosing a product on a draft.
-    if (!boms.data || form.bomId && boms.data.some((b) => String(b.id) === form.bomId)) return;
+    if (!boms.data || (form.bomId && boms.data.some((b) => String(b.id) === form.bomId))) return;
     const product = products.data?.find((p) => String(p.id) === form.productId);
     const preferred = boms.data.find((b) => b.id === product?.defaultBomId) ?? boms.data[0];
     setForm((f) => ({ ...f, bomId: preferred ? String(preferred.id) : '' }));
@@ -98,7 +107,10 @@ export function MoFormPage() {
 
   const isDraft = m?.status === 'DRAFT';
   const active = !!m && ACTIVE.includes(m.status);
-  const mayEdit = isNew ? can('MANUFACTURING', 'create') : can('MANUFACTURING', 'edit') && (user?.access.MANUFACTURING === 'ADMIN' || user?.isSystemAdmin || (isDraft && m?.createdById === user?.id));
+  const mayEdit = isNew
+    ? can('MANUFACTURING', 'create')
+    : can('MANUFACTURING', 'edit') &&
+      (user?.access.MANUFACTURING === 'ADMIN' || user?.isSystemAdmin || (isDraft && m?.createdById === user?.id));
   const headerEditable = isNew || (mayEdit && (isDraft || (active && editing)));
   const pendingProduction = m?.operations.some((o) => o.type === 'PRODUCTION' && o.status === 'PLACED');
 
@@ -117,7 +129,9 @@ export function MoFormPage() {
       if (created) navigate(`/manufacturing/${created.id}`, { replace: true });
       return;
     }
-    const payload = isDraft ? body() : { quantity: Number(form.quantity), assigneeId: body().assigneeId, deadline: body().deadline };
+    const payload = isDraft
+      ? body()
+      : { quantity: Number(form.quantity), assigneeId: body().assigneeId, deadline: body().deadline };
     const res = await action.run(() => api.patch<MoDTO & { procured: string[] }>(`/manufacturing/${id}`, payload));
     if (res) {
       mo.setData(res);
@@ -132,7 +146,11 @@ export function MoFormPage() {
     const res = await action.run(() => api.post<{ order: MoDTO; procured: string[] }>(`/manufacturing/${id}/confirm`));
     if (res) {
       mo.setData(res.order);
-      setNotice(res.procured.length ? `Confirmed. Components reserved; auto-created: ${res.procured.join(', ')}` : 'Confirmed. Components reserved.');
+      setNotice(
+        res.procured.length
+          ? `Confirmed. Components reserved; auto-created: ${res.procured.join(', ')}`
+          : 'Confirmed. Components reserved.',
+      );
     }
   };
 
@@ -145,7 +163,9 @@ export function MoFormPage() {
   };
 
   const produce = async () => {
-    const op = await action.run(() => api.post<OperationDTO>('/operations', { type: 'PRODUCTION', manufacturingOrderId: Number(id) }));
+    const op = await action.run(() =>
+      api.post<OperationDTO>('/operations', { type: 'PRODUCTION', manufacturingOrderId: Number(id) }),
+    );
     if (op) {
       setNotice(`${op.reference} placed — stock moves once a supervisor or manager confirms it.`);
       void mo.reload();
@@ -153,7 +173,9 @@ export function MoFormPage() {
   };
 
   const completeWo = async (woId: number, expected: number) => {
-    const res = await action.run(() => api.post<MoDTO>(`/manufacturing/${id}/work-orders/${woId}/complete`, { realMinutes: Number(minutes[woId] ?? expected) }));
+    const res = await action.run(() =>
+      api.post<MoDTO>(`/manufacturing/${id}/work-orders/${woId}/complete`, { realMinutes: Number(minutes[woId] ?? expected) }),
+    );
     if (res) mo.setData(res);
   };
 
@@ -174,7 +196,12 @@ export function MoFormPage() {
         }
       >
         {(isNew || (isDraft && mayEdit)) && (
-          <button type="button" className={isNew ? 'btn-primary' : 'btn-secondary'} disabled={action.busy} onClick={() => void save()}>
+          <button
+            type="button"
+            className={isNew ? 'btn-primary' : 'btn-secondary'}
+            disabled={action.busy}
+            onClick={() => void save()}
+          >
             {isNew ? 'Create' : 'Save'}
           </button>
         )}
@@ -238,7 +265,13 @@ export function MoFormPage() {
 
       <div className="card grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
         <Field label="Finished product">
-          <select className="input" value={form.productId} disabled={!(isNew || (isDraft && mayEdit))} onChange={(e) => setForm({ ...form, productId: e.target.value, bomId: '' })} required>
+          <select
+            className="input"
+            value={form.productId}
+            disabled={!(isNew || (isDraft && mayEdit))}
+            onChange={(e) => setForm({ ...form, productId: e.target.value, bomId: '' })}
+            required
+          >
             <option value="">Choose…</option>
             {products.data?.map((p) => (
               <option key={p.id} value={p.id}>
@@ -248,10 +281,24 @@ export function MoFormPage() {
           </select>
         </Field>
         <Field label="Quantity">
-          <input className="input" type="number" min="0.001" step="0.001" value={form.quantity} disabled={!headerEditable} onChange={(e) => setForm({ ...form, quantity: e.target.value })} />
+          <input
+            className="input"
+            type="number"
+            min="0.001"
+            step="0.001"
+            value={form.quantity}
+            disabled={!headerEditable}
+            onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+          />
         </Field>
         <Field label="Bill of materials">
-          <select className="input" value={form.bomId} disabled={!(isNew || (isDraft && mayEdit))} onChange={(e) => setForm({ ...form, bomId: e.target.value })} required>
+          <select
+            className="input"
+            value={form.bomId}
+            disabled={!(isNew || (isDraft && mayEdit))}
+            onChange={(e) => setForm({ ...form, bomId: e.target.value })}
+            required
+          >
             <option value="">{form.productId ? 'No BoM for this product' : 'Choose a product first'}</option>
             {boms.data?.map((b) => (
               <option key={b.id} value={b.id}>
@@ -261,7 +308,12 @@ export function MoFormPage() {
           </select>
         </Field>
         <Field label="Assignee">
-          <select className="input" value={form.assigneeId} disabled={!headerEditable} onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}>
+          <select
+            className="input"
+            value={form.assigneeId}
+            disabled={!headerEditable}
+            onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
+          >
             <option value="">—</option>
             {people.data?.map((p) => (
               <option key={p.id} value={p.id}>
@@ -271,11 +323,20 @@ export function MoFormPage() {
           </select>
         </Field>
         <Field label="Deadline">
-          <input className="input" type="date" value={form.deadline} disabled={!headerEditable} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
+          <input
+            className="input"
+            type="date"
+            value={form.deadline}
+            disabled={!headerEditable}
+            onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+          />
         </Field>
         {m?.origin && (
           <Field label="Source document">
-            <Link to={`/${m.origin.startsWith('SO') ? 'sales' : 'manufacturing'}?q=${m.origin}`} className="input block text-indigo-600 hover:underline">
+            <Link
+              to={`/${m.origin.startsWith('SO') ? 'sales' : 'manufacturing'}?q=${m.origin}`}
+              className="input block text-indigo-600 hover:underline"
+            >
               {m.origin}
             </Link>
           </Field>
@@ -345,7 +406,10 @@ export function MoFormPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {m.workOrders.map((w) => {
-                  const canDo = w.status === 'PENDING' && (m.status === 'CONFIRMED' || m.status === 'IN_PROGRESS') && can('MANUFACTURING', 'operate');
+                  const canDo =
+                    w.status === 'PENDING' &&
+                    (m.status === 'CONFIRMED' || m.status === 'IN_PROGRESS') &&
+                    can('MANUFACTURING', 'operate');
                   return (
                     <tr key={w.id}>
                       <td className="td font-medium">{w.name}</td>
@@ -369,7 +433,12 @@ export function MoFormPage() {
                       </td>
                       <td className="td">
                         {canDo ? (
-                          <button type="button" className="btn-secondary" disabled={action.busy} onClick={() => void completeWo(w.id, w.expectedMinutes)}>
+                          <button
+                            type="button"
+                            className="btn-secondary"
+                            disabled={action.busy}
+                            onClick={() => void completeWo(w.id, w.expectedMinutes)}
+                          >
                             Mark done
                           </button>
                         ) : (
@@ -385,10 +454,15 @@ export function MoFormPage() {
         </div>
       )}
 
-      {m && <OperationsPanel operations={m.operations} onChanged={() => {
+      {m && (
+        <OperationsPanel
+          operations={m.operations}
+          onChanged={() => {
             setNotice(null);
             void mo.reload();
-          }} />}
+          }}
+        />
+      )}
     </div>
   );
 }
