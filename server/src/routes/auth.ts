@@ -9,7 +9,8 @@ function cookieOptions(): CookieOptions {
   return {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    // COOKIE_SECURE=false lets the Docker demo run over plain http://localhost.
+    secure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : process.env.NODE_ENV === 'production',
     path: '/',
   };
 }

@@ -36,6 +36,14 @@ export async function resetDemo(): Promise<void> {
   }
 }
 
+/** On start with AUTO_SEED=true (Docker, Render), load the demo once — only into an empty database. */
+export async function maybeAutoSeed(): Promise<boolean> {
+  if (process.env.AUTO_SEED !== 'true') return false;
+  if ((await prisma.user.count()) > 0) return false;
+  await seedDemo();
+  return true;
+}
+
 export function __resetThrottleForTests(): void {
   lastReset = 0;
 }
