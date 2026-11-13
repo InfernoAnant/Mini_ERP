@@ -1,4 +1,5 @@
 import type { SalesOrderDTO } from '../../api/types';
+import LevelBar from '../../components/LevelBar';
 import ListPage from '../../components/ListPage';
 import { date, money, StatusBadge } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +23,9 @@ export function SalesListPage() {
         <>
           {o.customer.name} · {money(o.total)}
           {o.late && <span className="ml-1 font-medium text-rose-600">· Late</span>}
+          <div className="mt-2">
+            <LevelBar progress={o.progress} size="sm" />
+          </div>
         </>
       )}
       columns={[
@@ -30,6 +34,7 @@ export function SalesListPage() {
         { header: 'Salesperson', cell: (o) => o.salesperson?.name ?? '—' },
         { header: 'Scheduled', cell: (o) => date(o.scheduledDate) },
         { header: 'Total', cell: (o) => money(o.total), className: 'text-right' },
+        { header: 'Progress', cell: (o) => <LevelBar progress={o.progress} size="sm" /> },
         {
           header: 'Status',
           cell: (o) => (

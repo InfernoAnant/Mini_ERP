@@ -5,6 +5,7 @@ export const SALES_STATUSES = ['DRAFT', 'CONFIRMED', 'PARTIALLY_DELIVERED', 'FUL
 
 export const salesConfig: OrderConfig<SalesOrderDTO> = {
   module: 'SALES',
+  journeyKind: 'SO',
   endpoint: '/sales',
   listPath: '/sales',
   title: 'Sales order',
@@ -42,6 +43,7 @@ export const salesConfig: OrderConfig<SalesOrderDTO> = {
     })),
     operations: d.operations,
     procurements: d.procurements,
+    progress: d.progress,
   }),
   toBody: (form, lines) => {
     const b = headerBody(form, lines);

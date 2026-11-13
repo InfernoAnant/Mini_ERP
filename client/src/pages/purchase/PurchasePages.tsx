@@ -1,4 +1,5 @@
 import type { PurchaseOrderDTO } from '../../api/types';
+import LevelBar from '../../components/LevelBar';
 import ListPage from '../../components/ListPage';
 import { date, money, StatusBadge } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,9 @@ export function PurchaseListPage() {
           {o.vendor.name} · {money(o.total)}
           {o.origin && <span className="ml-1">· from {o.origin}</span>}
           {o.late && <span className="ml-1 font-medium text-rose-600">· Late</span>}
+          <div className="mt-2">
+            <LevelBar progress={o.progress} size="sm" />
+          </div>
         </>
       )}
       columns={[
@@ -31,6 +35,7 @@ export function PurchaseListPage() {
         { header: 'Source', cell: (o) => o.origin ?? '—' },
         { header: 'Expected', cell: (o) => date(o.expectedDate) },
         { header: 'Total', cell: (o) => money(o.total), className: 'text-right' },
+        { header: 'Progress', cell: (o) => <LevelBar progress={o.progress} size="sm" /> },
         {
           header: 'Status',
           cell: (o) => (

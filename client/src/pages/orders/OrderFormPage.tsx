@@ -2,7 +2,9 @@ import { type FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useAction, useLoad } from '../../api/hooks';
-import type { Contact, Module, OperationDTO, OperationType, ProductOption, Ref } from '../../api/types';
+import type { Contact, Module, OperationDTO, OperationType, ProductOption, Progress, Ref } from '../../api/types';
+import JourneyPanel from '../../components/JourneyPanel';
+import LevelBar, { useCelebration } from '../../components/LevelBar';
 import LinesEditor, { type EditableLine, newLineKey } from '../../components/LinesEditor';
 import LogsButton from '../../components/LogsButton';
 import OperationsPanel from '../../components/OperationsPanel';
@@ -24,11 +26,13 @@ export type OrderView = {
   origin?: string | null;
   lines: { id: number; productId: number; productName: string; quantity: number; done: number; pending: number; price: number; available?: boolean; freeToUse?: number }[];
   operations: OperationDTO[];
+  progress: Progress;
   procurements?: { id: number; reference: string; type: 'PO' | 'MO'; status: string }[];
 };
 
 export type OrderConfig<D> = {
   module: Module;
+  journeyKind: 'SO' | 'PO';
   endpoint: string;
   listPath: string;
   title: string;
@@ -78,6 +82,7 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const [opOpen, setOpOpen] = useState(false);
   const action = useAction();
   const v = order.data;
+  const party = useCelebration(v?.progress, String(id));
 
   const resetForm = (view: OrderView) => {
     setHeader({ partnerId: String(view.partner.id), address: view.address ?? '', personId: view.person ? String(view.person.id) : '', date: dateInput(view.date) });
@@ -225,6 +230,9 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
         </Notice>
       )}
 
+      {v && <LevelBar progress={v.progress} size="lg" celebrate={party.celebrate} onCelebrated={party.done} />}
+      {v && <JourneyPanel kind={config.journeyKind} id={v.id} refreshKey={`${v.status}-${v.progress.percent}-${v.operations.length}`} />}
+
       <form onSubmit={save} className="card p-5">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Field label={config.partnerLabel}>
@@ -289,22 +297,10 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
         />
       </div>
 
-      {v?.procurements && v.procurements.length > 0 && (
-        <div className="card mt-4 p-4">
-          <h2 className="mb-2 font-semibold">Auto-procurement</h2>
-          <ul className="flex flex-wrap gap-2 text-sm">
-            {v.procurements.map((p) => (
-              <li key={p.reference}>
-                <Link to={`/${p.type === 'PO' ? 'purchase' : 'manufacturing'}/${p.id}`} className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1 hover:border-indigo-300">
-                  {p.reference} <StatusBadge status={p.status} />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {v && <OperationsPanel operations={v.operations} onChanged={() => void order.reload()} />}
+      {v && <OperationsPanel operations={v.operations} onChanged={() => {
+            setNotice(null);
+            void order.reload();
+          }} />}
 
       {opOpen && v && (
         <PlaceOperationDialog

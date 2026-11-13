@@ -9,6 +9,18 @@ export type PurchaseStatus = 'DRAFT' | 'CONFIRMED' | 'PARTIALLY_RECEIVED' | 'FUL
 export type MoStatus = 'DRAFT' | 'CONFIRMED' | 'IN_PROGRESS' | 'TO_CLOSE' | 'DONE' | 'CANCELLED';
 
 export type Ref = { id: number; name: string };
+
+export type Progress = { level: 0 | 1 | 2 | 3 | 4; percent: number; stage: string; stages: string[]; cancelled: boolean; complete: boolean };
+export type JourneyNode = {
+  kind: 'SO' | 'PO' | 'MO';
+  id: number;
+  reference: string;
+  title: string;
+  status: string;
+  progress: Progress;
+  canOpen: boolean;
+  children: JourneyNode[];
+};
 export type Paged<T> = { items: T[]; total: number; page: number; pageSize: number };
 
 export type AuthUser = {
@@ -124,6 +136,7 @@ export type SalesOrderDTO = {
   late: boolean;
   procurements: Procurement[];
   operations: OperationDTO[];
+  progress: Progress;
 };
 
 export type PurchaseOrderDTO = {
@@ -142,6 +155,7 @@ export type PurchaseOrderDTO = {
   total: number;
   late: boolean;
   operations: OperationDTO[];
+  progress: Progress;
 };
 
 export type MoDTO = {
@@ -161,6 +175,7 @@ export type MoDTO = {
   components: { id: number; productId: number; productName: string; unit: string; toConsume: number; consumed: number; available: boolean }[];
   workOrders: { id: number; sequence: number; name: string; workCenter: Ref; expectedMinutes: number; realMinutes: number | null; status: 'PENDING' | 'DONE' }[];
   operations: OperationDTO[];
+  progress: Progress;
 };
 
 export type Section = { all: Record<string, number>; my: Record<string, number>; late: number; myLate: number };

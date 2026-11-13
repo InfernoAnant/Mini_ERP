@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useAction, useLoad } from '../../api/hooks';
 import type { MoDTO, OperationDTO, ProductOption, Ref } from '../../api/types';
+import JourneyPanel from '../../components/JourneyPanel';
+import LevelBar, { useCelebration } from '../../components/LevelBar';
 import ListPage from '../../components/ListPage';
 import LogsButton from '../../components/LogsButton';
 import OperationsPanel from '../../components/OperationsPanel';
@@ -30,6 +32,9 @@ export function MoListPage() {
           {qty(m.quantity)} × {m.product.name}
           {m.origin && <span> · from {m.origin}</span>}
           {m.late && <span className="ml-1 font-medium text-rose-600">· Late</span>}
+          <div className="mt-2">
+            <LevelBar progress={m.progress} size="sm" />
+          </div>
         </>
       )}
       columns={[
@@ -39,6 +44,7 @@ export function MoListPage() {
         { header: 'Source', cell: (m) => m.origin ?? '—' },
         { header: 'Assignee', cell: (m) => m.assignee?.name ?? '—' },
         { header: 'Deadline', cell: (m) => date(m.deadline) },
+        { header: 'Progress', cell: (m) => <LevelBar progress={m.progress} size="sm" /> },
         {
           header: 'Status',
           cell: (m) => (
@@ -72,6 +78,7 @@ export function MoFormPage() {
   const [minutes, setMinutes] = useState<Record<number, string>>({});
   const action = useAction();
   const m = mo.data;
+  const party = useCelebration(m?.progress, String(id));
 
   const resetForm = (d: MoDTO) =>
     setForm({ productId: String(d.product.id), quantity: String(d.quantity), bomId: String(d.bom.id), assigneeId: d.assignee ? String(d.assignee.id) : '', deadline: dateInput(d.deadline) });
@@ -226,6 +233,9 @@ export function MoFormPage() {
       <ErrorBanner message={action.error} onClose={() => action.setError(null)} />
       {notice && <Notice tone="success">{notice}</Notice>}
 
+      {m && <LevelBar progress={m.progress} size="lg" celebrate={party.celebrate} onCelebrated={party.done} />}
+      {m && <JourneyPanel kind="MO" id={m.id} refreshKey={`${m.status}-${m.progress.percent}`} />}
+
       <div className="card grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
         <Field label="Finished product">
           <select className="input" value={form.productId} disabled={!(isNew || (isDraft && mayEdit))} onChange={(e) => setForm({ ...form, productId: e.target.value, bomId: '' })} required>
@@ -375,7 +385,10 @@ export function MoFormPage() {
         </div>
       )}
 
-      {m && <OperationsPanel operations={m.operations} onChanged={() => void mo.reload()} />}
+      {m && <OperationsPanel operations={m.operations} onChanged={() => {
+            setNotice(null);
+            void mo.reload();
+          }} />}
     </div>
   );
 }

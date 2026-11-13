@@ -5,6 +5,7 @@ export const PURCHASE_STATUSES = ['DRAFT', 'CONFIRMED', 'PARTIALLY_RECEIVED', 'F
 
 export const purchaseConfig: OrderConfig<PurchaseOrderDTO> = {
   module: 'PURCHASE',
+  journeyKind: 'PO',
   endpoint: '/purchase',
   listPath: '/purchase',
   title: 'Purchase order',
@@ -40,6 +41,7 @@ export const purchaseConfig: OrderConfig<PurchaseOrderDTO> = {
       price: l.unitCost,
     })),
     operations: d.operations,
+    progress: d.progress,
   }),
   toBody: (form, lines) => {
     const b = headerBody(form, lines);
