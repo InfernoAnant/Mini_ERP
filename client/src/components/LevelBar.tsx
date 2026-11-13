@@ -21,7 +21,7 @@ export default function LevelBar({
   if (size === 'sm') {
     return (
       <div
-        className="flex min-w-[7rem] items-center gap-2"
+        className="flex min-w-28 items-center gap-2"
         title={progress.cancelled ? 'Cancelled' : `${progress.stage} · ${progress.percent}%`}
       >
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200">

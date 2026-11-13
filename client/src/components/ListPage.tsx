@@ -65,7 +65,7 @@ export default function ListPage<T extends { id: number }>(props: Props<T>) {
 
       <div className="card mb-4 flex flex-wrap items-center gap-2 p-3">
         <form
-          className="flex min-w-[12rem] flex-1 gap-2"
+          className="flex min-w-48 flex-1 gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             update({ q: qInput.trim() });

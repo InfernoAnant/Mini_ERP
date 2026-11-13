@@ -190,7 +190,7 @@ export function BomFormPage() {
             {ops.map((o) => (
               <div key={o.key} className="flex flex-wrap items-center gap-2">
                 <input
-                  className="input min-w-[10rem] flex-1"
+                  className="input min-w-40 flex-1"
                   placeholder="Operation (e.g. Assembly)"
                   value={o.name}
                   aria-label="Operation name"

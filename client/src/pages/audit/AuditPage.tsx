@@ -151,13 +151,13 @@ export default function AuditPage() {
                     <td className="td whitespace-nowrap">{r.reference ?? `#${r.recordId}`}</td>
                     <td className="td">{label(r.action)}</td>
                     <td className="td">{r.field ?? '—'}</td>
-                    <td className="td max-w-[14rem] truncate" title={r.oldValue ?? ''}>
+                    <td className="td max-w-56 truncate" title={r.oldValue ?? ''}>
                       {r.oldValue ?? '—'}
                     </td>
-                    <td className="td max-w-[14rem] truncate" title={r.newValue ?? ''}>
+                    <td className="td max-w-56 truncate" title={r.newValue ?? ''}>
                       {r.newValue ?? '—'}
                     </td>
-                    <td className="td max-w-[14rem] truncate text-slate-500" title={r.note ?? ''}>
+                    <td className="td max-w-56 truncate text-slate-500" title={r.note ?? ''}>
                       {r.note ?? ''}
                     </td>
                   </tr>

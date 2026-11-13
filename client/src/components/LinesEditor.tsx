@@ -52,7 +52,7 @@ export default function LinesEditor({ lines, onChange, products, editable, price
             const product = products.find((p) => p.id === l.productId);
             return (
               <tr key={l.key}>
-                <td className="td min-w-[12rem]">
+                <td className="td min-w-48">
                   {editable && committed === 0 ? (
                     <select
                       className="input"

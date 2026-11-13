@@ -39,9 +39,11 @@ export function UserListPage() {
               <tr key={u.id} className="cursor-pointer hover:bg-slate-50" onClick={() => navigate(`/users/${u.id}`)}>
                 <td className="td font-medium">
                   {u.name}
-                  {u.isDemoLocked && <span className="ml-2 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">demo</span>}
+                  {u.isDemoLocked && (
+                    <span className="ml-2 rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">demo</span>
+                  )}
                   {u.readOnly && (
-                    <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">read-only</span>
+                    <span className="ml-1 rounded-sm bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">read-only</span>
                   )}
                 </td>
                 <td className="td">{u.loginId}</td>

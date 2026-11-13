@@ -21,10 +21,7 @@ const CHIP_STYLES: Record<string, string> = {
 
 function Chip({ to, count, text, tone }: { to: string; count: number; text: string; tone: string }) {
   return (
-    <Link
-      to={to}
-      className={`flex min-w-[5.5rem] flex-col items-center rounded-lg border bg-white px-3 py-2 hover:shadow-sm ${tone}`}
-    >
+    <Link to={to} className={`flex min-w-22 flex-col items-center rounded-lg border bg-white px-3 py-2 hover:shadow-xs ${tone}`}>
       <span className="text-xl font-semibold">{count}</span>
       <span className="text-center text-xs">{text}</span>
     </Link>
