@@ -18,3 +18,9 @@ Thumbs.db
 
 # Superpowers plan workspaces
 .superpowers/
+
+# Build/test artifacts
+client/tsconfig.tsbuildinfo
+test-results/
+playwright-report/
+desktop.ini

@@ -11,6 +11,7 @@ for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
   const out = `${res.stdout ?? ''}${res.stderr ?? ''}`;
   process.stdout.write(out);
   if (res.status === 0) process.exit(0);
+  // eslint-disable-next-line no-control-regex -- stripping ANSI colour codes from Vitest output
   const plain = out.replace(/\x1b\[[0-9;]*m/g, '');
   const workerCrash = plain.includes('Worker exited unexpectedly');
   const realFailure = /\bfailed\b/.test(plain.split('\n').filter((l) => /^\s+Tests\s/.test(l)).join('\n')) || /FAIL\s/.test(plain);

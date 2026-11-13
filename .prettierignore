@@ -1,0 +1,10 @@
+**/dist
+**/node_modules
+venv
+server/prisma/migrations
+package-lock.json
+test-results
+playwright-report
+.superpowers
+docs/problem-statement.txt
+*.prisma

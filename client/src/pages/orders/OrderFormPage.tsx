@@ -90,7 +90,6 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   };
   useEffect(() => {
     if (v) resetForm(v);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [v]);
   useEffect(() => {
     if (isNew && user) setHeader((h) => ({ ...h, personId: h.personId || String(user.id) }));
