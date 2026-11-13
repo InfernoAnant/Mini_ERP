@@ -10,7 +10,7 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
-        value: 22.12.0
+        value: '24'
       - key: NODE_ENV
         value: production
       - key: JWT_SECRET

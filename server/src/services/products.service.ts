@@ -1,13 +1,13 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertAnyModuleAccess, assertCan, assertCanEdit } from '../config/permissions';
-import { dec } from '../lib/decimal';
-import { AppError, notFound } from '../lib/errors';
-import { type ListQuery, type Paged, paging } from '../lib/listQuery';
-import { type Db, prisma, transaction } from '../lib/prisma';
-import { logAudit, logChanges } from './audit.service';
-import type { AuthUser } from './auth.service';
-import { getLevels, postMoves } from './stock.service';
+import { assertAnyModuleAccess, assertCan, assertCanEdit } from '../config/permissions.js';
+import { dec } from '../lib/decimal.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
+import { type Db, prisma, transaction } from '../lib/prisma.js';
+import { logAudit, logChanges } from './audit.service.js';
+import type { AuthUser } from './auth.service.js';
+import { getLevels, postMoves } from './stock.service.js';
 
 const money = z.coerce.number().min(0, 'Must be 0 or more').max(1e9);
 

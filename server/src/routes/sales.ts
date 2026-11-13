@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { serialize } from '../lib/decimal';
-import { idParam } from '../lib/http';
-import { listQuerySchema } from '../lib/listQuery';
-import { currentUser, requireAuth } from '../middleware/auth';
-import { getJourney } from '../services/journey.service';
-import * as so from '../services/sales.service';
+import { serialize } from '../lib/decimal.js';
+import { idParam } from '../lib/http.js';
+import { listQuerySchema } from '../lib/listQuery.js';
+import { currentUser, requireAuth } from '../middleware/auth.js';
+import { getJourney } from '../services/journey.service.js';
+import * as so from '../services/sales.service.js';
 
 const router = Router();
 router.use(requireAuth);

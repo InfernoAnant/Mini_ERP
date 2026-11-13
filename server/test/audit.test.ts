@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { dec } from '../src/lib/decimal';
-import { prisma } from '../src/lib/prisma';
-import { logAudit, logChanges, logStatus } from '../src/services/audit.service';
-import { nextRef } from '../src/services/reference.service';
-import { agentFor, makeUser, resetDb } from './helpers';
+import { dec } from '../src/lib/decimal.js';
+import { prisma } from '../src/lib/prisma.js';
+import { logAudit, logChanges, logStatus } from '../src/services/audit.service.js';
+import { nextRef } from '../src/services/reference.service.js';
+import { agentFor, makeUser, resetDb } from './helpers.js';
 
 const base = { userId: null, module: 'PRODUCTS' as const, recordType: 'Product', recordId: 7, reference: 'Table' };
 

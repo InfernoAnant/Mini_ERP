@@ -1,11 +1,11 @@
-import type { Prisma } from '@prisma/client';
-import { can } from '../config/permissions';
-import { prisma } from '../lib/prisma';
-import type { AuthUser } from './auth.service';
-import { MO_RESERVING } from './manufacturing.service';
-import { countAwaiting } from './operations.service';
-import { SO_OPEN } from './sales.service';
-import { getLevels } from './stock.service';
+import type { Prisma } from '../generated/prisma/client.js';
+import { can } from '../config/permissions.js';
+import { prisma } from '../lib/prisma.js';
+import type { AuthUser } from './auth.service.js';
+import { MO_RESERVING } from './manufacturing.service.js';
+import { countAwaiting } from './operations.service.js';
+import { SO_OPEN } from './sales.service.js';
+import { getLevels } from './stock.service.js';
 
 type Counts = Record<string, number>;
 type Section = { all: Counts; my: Counts; late: number; myLate: number };

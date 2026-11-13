@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { currentUser, requireAuth } from '../middleware/auth';
-import { contactSchema, createContact, listContacts, listWorkCenters } from '../services/contacts.service';
+import { currentUser, requireAuth } from '../middleware/auth.js';
+import { contactSchema, createContact, listContacts, listWorkCenters } from '../services/contacts.service.js';
 
 export const contactsRouter = Router();
 contactsRouter.use(requireAuth);

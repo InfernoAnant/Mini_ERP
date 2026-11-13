@@ -1,13 +1,13 @@
-import type { AccessLevel, Module } from '@prisma/client';
+import type { AccessLevel, Module } from '../generated/prisma/client.js';
 import bcrypt from 'bcryptjs';
-import { prisma } from '../lib/prisma';
-import { type AuthUser, loadAuthUser } from '../services/auth.service';
-import { createBom } from '../services/bom.service';
-import { completeWorkOrder, confirmMo, createMo } from '../services/manufacturing.service';
-import { confirmOperation, placeOperation } from '../services/operations.service';
-import { createProduct, updateProduct } from '../services/products.service';
-import { cancelPurchase, confirmPurchase, createPurchase } from '../services/purchase.service';
-import { cancelSales, confirmSales, createSales } from '../services/sales.service';
+import { prisma } from '../lib/prisma.js';
+import { type AuthUser, loadAuthUser } from '../services/auth.service.js';
+import { createBom } from '../services/bom.service.js';
+import { completeWorkOrder, confirmMo, createMo } from '../services/manufacturing.service.js';
+import { confirmOperation, placeOperation } from '../services/operations.service.js';
+import { createProduct, updateProduct } from '../services/products.service.js';
+import { cancelPurchase, confirmPurchase, createPurchase } from '../services/purchase.service.js';
+import { cancelSales, confirmSales, createSales } from '../services/sales.service.js';
 
 /** Shared demo password (demo accounts log in with one click; this is only for manual login). */
 export const DEMO_PASSWORD = 'Demo@1234';

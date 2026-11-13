@@ -5,3 +5,4 @@ dist
 !.env.example
 test
 scripts
+src/generated

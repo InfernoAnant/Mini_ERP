@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { seedDemo } from '../src/services/demo.service';
-import { agentFor, app, makeUser, resetDb } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { seedDemo } from '../src/services/demo.service.js';
+import { agentFor, app, makeUser, resetDb } from './helpers.js';
 
 async function demo(loginId: string) {
   const agent = request.agent(app());

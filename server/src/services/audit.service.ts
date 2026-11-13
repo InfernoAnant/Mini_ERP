@@ -1,7 +1,7 @@
-import { type AuditAction, type AuditModule, Prisma } from '@prisma/client';
+import { type AuditAction, type AuditModule, Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { paging } from '../lib/listQuery';
-import { type Db, type Tx, prisma } from '../lib/prisma';
+import { paging } from '../lib/listQuery.js';
+import { type Db, type Tx, prisma } from '../lib/prisma.js';
 
 export type AuditBase = {
   userId: number | null;
@@ -19,10 +19,12 @@ export function auditValue(v: unknown): string | null {
   return String(v);
 }
 
+type DecimalInput = string | number | Prisma.Decimal;
+
 function sameValue(a: unknown, b: unknown): boolean {
   if (Prisma.Decimal.isDecimal(a) || Prisma.Decimal.isDecimal(b)) {
     if (a === null || a === undefined || b === null || b === undefined) return a === b;
-    return new Prisma.Decimal(a as Prisma.Decimal.Value).equals(new Prisma.Decimal(b as Prisma.Decimal.Value));
+    return new Prisma.Decimal(a as DecimalInput).equals(new Prisma.Decimal(b as DecimalInput));
   }
   return auditValue(a) === auditValue(b);
 }

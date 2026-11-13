@@ -1,4 +1,4 @@
-import type { Db } from './prisma';
+import type { Db } from './prisma.js';
 
 export type UserRef = { id: number; name: string } | null;
 

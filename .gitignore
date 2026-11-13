@@ -24,3 +24,6 @@ client/tsconfig.tsbuildinfo
 test-results/
 playwright-report/
 desktop.ini
+
+# Prisma 7 generated client (built by `prisma generate`)
+server/src/generated/

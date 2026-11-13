@@ -1,15 +1,17 @@
 import path from 'node:path';
 import dotenv from 'dotenv';
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env.test'), override: true });
-process.env.JWT_SECRET ??= 'test-secret';
-
 import { afterAll } from 'vitest';
-import { prisma } from '../../src/lib/prisma';
-import { closeServer } from '../helpers';
 
-// Each test file gets a fresh module registry (and PrismaClient); close it so engines don't pile up.
+dotenv.config({ path: path.resolve(import.meta.dirname, '../../.env.test'), override: true, quiet: true });
+process.env.JWT_SECRET ??= 'test-secret';
+if (!/test/i.test(process.env.DATABASE_URL ?? '')) {
+  throw new Error('Refusing to run tests: DATABASE_URL must point at a test database (name containing "test").');
+}
+
+// Imported lazily so the client is created with the test DATABASE_URL loaded above.
 afterAll(async () => {
+  const { closeServer } = await import('../helpers.js');
+  const { prisma } = await import('../../src/lib/prisma.js');
   await closeServer();
   await prisma.$disconnect();
 });

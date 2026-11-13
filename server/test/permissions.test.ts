@@ -1,7 +1,7 @@
-import type { AccessLevel, Module } from '@prisma/client';
+import type { AccessLevel, Module } from '../src/generated/prisma/client.js';
 import { describe, expect, it } from 'vitest';
-import { assertCanEdit, can, canConfirmOperation } from '../src/config/permissions';
-import type { AuthUser } from '../src/services/auth.service';
+import { assertCanEdit, can, canConfirmOperation } from '../src/config/permissions.js';
+import type { AuthUser } from '../src/services/auth.service.js';
 
 function user(access: Partial<Record<Module, AccessLevel>>, extra: Partial<AuthUser> = {}): AuthUser {
   return {

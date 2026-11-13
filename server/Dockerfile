@@ -1,26 +1,26 @@
 # syntax=docker/dockerfile:1
 # ---- build ----
-FROM node:22-bookworm-slim AS build
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
-COPY package.json package-lock.json ./
-RUN npm ci
+# Schema + config first: `npm ci` runs `prisma generate` (postinstall) into src/generated
+COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npm ci
 COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
-RUN npx tsc -p tsconfig.build.json
+RUN npx prisma generate && npx tsc -p tsconfig.build.json
 
 # ---- runtime ----
-FROM node:22-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
-COPY package.json package-lock.json ./
-# `prisma` is a runtime dependency (needed for `migrate deploy` at start)
-RUN npm ci --omit=dev && npm cache clean --force
+COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+# Production deps only (prisma CLI is a runtime dependency for `migrate deploy`); the generated
+# client is already compiled into dist/, so skip the postinstall generate.
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 5000

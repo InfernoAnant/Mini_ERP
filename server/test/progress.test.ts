@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { dec } from '../src/lib/decimal';
-import { moProgress, purchaseProgress, salesProgress } from '../src/services/progress.service';
-import { agentFor, makeContact, makeProduct, makeUser, resetDb } from './helpers';
+import { dec } from '../src/lib/decimal.js';
+import { moProgress, purchaseProgress, salesProgress } from '../src/services/progress.service.js';
+import { agentFor, makeContact, makeProduct, makeUser, resetDb } from './helpers.js';
 
 const line = (q: number | string, delivered: number | string, available = true) => ({
   quantity: dec(q),

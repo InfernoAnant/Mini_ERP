@@ -1,6 +1,6 @@
-import type { AccessLevel, Module, OperationType } from '@prisma/client';
-import { AppError } from '../lib/errors';
-import type { AuthUser } from '../services/auth.service';
+import type { AccessLevel, Module, OperationType } from '../generated/prisma/client.js';
+import { AppError } from '../lib/errors.js';
+import type { AuthUser } from '../services/auth.service.js';
 
 export type Action = 'view' | 'create' | 'edit' | 'delete' | 'confirm' | 'cancel' | 'operate' | 'adjust';
 

@@ -1,12 +1,12 @@
-import type { Module } from '@prisma/client';
-import { assertCan, can } from '../config/permissions';
-import { qtyText, ZERO } from '../lib/decimal';
-import { prisma } from '../lib/prisma';
-import type { AuthUser } from './auth.service';
-import { moDtoById } from './manufacturing.service';
-import type { Progress } from './progress.service';
-import { purchaseDtoById } from './purchase.service';
-import { salesDtoById } from './sales.service';
+import type { Module } from '../generated/prisma/client.js';
+import { assertCan, can } from '../config/permissions.js';
+import { qtyText, ZERO } from '../lib/decimal.js';
+import { prisma } from '../lib/prisma.js';
+import type { AuthUser } from './auth.service.js';
+import { moDtoById } from './manufacturing.service.js';
+import type { Progress } from './progress.service.js';
+import { purchaseDtoById } from './purchase.service.js';
+import { salesDtoById } from './sales.service.js';
 
 export type JourneyKind = 'SO' | 'PO' | 'MO';
 export type JourneyNode = {

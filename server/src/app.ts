@@ -1,19 +1,19 @@
 import cookieParser from 'cookie-parser';
 import express, { type Express } from 'express';
-import { errorHandler, notFoundHandler } from './lib/errors';
-import auditRoutes from './routes/audit';
-import authRoutes from './routes/auth';
-import bomRoutes from './routes/boms';
-import { dashboardRouter, demoRouter } from './routes/dashboard';
-import { contactsRouter, workCentersRouter } from './routes/contacts';
-import manufacturingRoutes from './routes/manufacturing';
-import operationRoutes from './routes/operations';
-import productRoutes from './routes/products';
-import purchaseRoutes from './routes/purchase';
-import salesRoutes from './routes/sales';
-import userRoutes from './routes/users';
+import { errorHandler, notFoundHandler } from './lib/errors.js';
+import auditRoutes from './routes/audit.js';
+import authRoutes from './routes/auth.js';
+import bomRoutes from './routes/boms.js';
+import { dashboardRouter, demoRouter } from './routes/dashboard.js';
+import { contactsRouter, workCentersRouter } from './routes/contacts.js';
+import manufacturingRoutes from './routes/manufacturing.js';
+import operationRoutes from './routes/operations.js';
+import productRoutes from './routes/products.js';
+import purchaseRoutes from './routes/purchase.js';
+import salesRoutes from './routes/sales.js';
+import userRoutes from './routes/users.js';
 // Installs MTO procurement into manufacturing confirmation (see setComponentProcurer).
-import './services/procurement.service';
+import './services/procurement.service.js';
 
 export function createApp(): Express {
   const app = express();

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { dec } from '../src/lib/decimal';
-import { prisma } from '../src/lib/prisma';
-import { getLevels, ledgerSumMatchesOnHand, postMoves } from '../src/services/stock.service';
-import { makeContact, makeProduct, makeUser, resetDb } from './helpers';
+import { dec } from '../src/lib/decimal.js';
+import { prisma } from '../src/lib/prisma.js';
+import { getLevels, ledgerSumMatchesOnHand, postMoves } from '../src/services/stock.service.js';
+import { makeContact, makeProduct, makeUser, resetDb } from './helpers.js';
 
 async function onHand(id: number): Promise<string> {
   return (await prisma.product.findUniqueOrThrow({ where: { id } })).onHand.toString();

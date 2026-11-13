@@ -1,4 +1,4 @@
-import type { Tx } from '../lib/prisma';
+import type { Tx } from '../lib/prisma.js';
 
 export type RefPrefix = 'SO' | 'PO' | 'MO' | 'BOM' | 'OP';
 

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { agentFor, app, makeUser, resetDb } from './helpers';
+import { agentFor, app, makeUser, resetDb } from './helpers.js';
 
 const valid = { loginId: 'newuser1', email: 'new@test.local', password: 'Strong@123', name: 'New User' };
 

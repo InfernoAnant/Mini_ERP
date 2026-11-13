@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { maybeAutoSeed } from '../src/services/demo.service';
-import { makeUser, resetDb } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { maybeAutoSeed } from '../src/services/demo.service.js';
+import { makeUser, resetDb } from './helpers.js';
 
 describe('AUTO_SEED on start', () => {
   beforeEach(resetDb);

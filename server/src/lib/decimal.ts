@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma/client.js';
 
 export type Dec = Prisma.Decimal;
 export const ZERO = new Prisma.Decimal(0);

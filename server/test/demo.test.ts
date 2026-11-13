@@ -1,9 +1,9 @@
 import request from 'supertest';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { resetDemo, seedDemo, __resetThrottleForTests } from '../src/services/demo.service';
-import { ledgerSumMatchesOnHand } from '../src/services/stock.service';
-import { app, resetDb } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { resetDemo, seedDemo, __resetThrottleForTests } from '../src/services/demo.service.js';
+import { ledgerSumMatchesOnHand } from '../src/services/stock.service.js';
+import { app, resetDb } from './helpers.js';
 
 async function demoAgent(loginId: string) {
   const agent = request.agent(app());

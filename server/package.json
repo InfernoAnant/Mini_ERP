@@ -7,33 +7,33 @@
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "node dist/src/index.js",
     "test": "node scripts/run-tests.mjs",
-    "typecheck": "tsc --noEmit"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "6.19.0",
-    "bcryptjs": "3.0.2",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "bcryptjs": "3.0.3",
     "cookie-parser": "1.4.7",
-    "dotenv": "16.4.7",
-    "express": "5.1.0",
-    "jsonwebtoken": "9.0.2",
-    "prisma": "6.19.0",
-    "zod": "3.24.2"
+    "dotenv": "18.0.10",
+    "express": "5.3.0",
+    "jsonwebtoken": "9.0.3",
+    "prisma": "7.10.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
-    "@types/cookie-parser": "1.4.8",
-    "@types/express": "5.0.0",
-    "@types/jsonwebtoken": "9.0.7",
-    "@types/node": "22.10.5",
-    "@types/supertest": "6.0.2",
-    "supertest": "7.0.0",
-    "tsx": "4.19.2",
-    "typescript": "5.7.3",
-    "vitest": "3.0.5"
+    "@types/cookie-parser": "1.4.10",
+    "@types/express": "5.0.6",
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/node": "24.19.2",
+    "@types/supertest": "7.2.1",
+    "supertest": "7.3.2",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.1.0"
   },
   "engines": {
-    "node": ">=20 <23"
-  }
+    "node": ">=24 <25"
+  },
+  "type": "module"
 }

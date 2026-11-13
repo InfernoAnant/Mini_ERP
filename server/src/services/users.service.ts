@@ -1,11 +1,11 @@
-import type { AccessLevel, Module, Prisma } from '@prisma/client';
+import type { AccessLevel, Module, Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertAnyModuleAccess } from '../config/permissions';
-import { AppError, notFound } from '../lib/errors';
-import { paging } from '../lib/listQuery';
-import { type Tx, prisma, transaction } from '../lib/prisma';
-import { type AuditBase, logChanges } from './audit.service';
-import { type AuthUser, MODULES, toAuthUser } from './auth.service';
+import { assertAnyModuleAccess } from '../config/permissions.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { paging } from '../lib/listQuery.js';
+import { type Tx, prisma, transaction } from '../lib/prisma.js';
+import { type AuditBase, logChanges } from './audit.service.js';
+import { type AuthUser, MODULES, toAuthUser } from './auth.service.js';
 
 const level = z.enum(['ADMIN', 'USER', 'NONE']);
 

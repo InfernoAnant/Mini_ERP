@@ -1,12 +1,12 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertAnyModuleAccess, assertCan } from '../config/permissions';
-import { AppError, notFound } from '../lib/errors';
-import { type ListQuery, type Paged, paging } from '../lib/listQuery';
-import { type Db, prisma, transaction } from '../lib/prisma';
-import { logAudit, logChanges } from './audit.service';
-import type { AuthUser } from './auth.service';
-import { nextRef } from './reference.service';
+import { assertAnyModuleAccess, assertCan } from '../config/permissions.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
+import { type Db, prisma, transaction } from '../lib/prisma.js';
+import { logAudit, logChanges } from './audit.service.js';
+import type { AuthUser } from './auth.service.js';
+import { nextRef } from './reference.service.js';
 
 export const bomInputSchema = z
   .object({

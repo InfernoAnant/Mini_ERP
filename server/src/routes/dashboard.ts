@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { serialize } from '../lib/decimal';
-import { currentUser, requireAuth } from '../middleware/auth';
-import { getDashboard } from '../services/dashboard.service';
-import { resetDemo } from '../services/demo.service';
+import { serialize } from '../lib/decimal.js';
+import { currentUser, requireAuth } from '../middleware/auth.js';
+import { getDashboard } from '../services/dashboard.service.js';
+import { resetDemo } from '../services/demo.service.js';
 
 export const dashboardRouter = Router();
 dashboardRouter.get('/', requireAuth, async (req, res) => {

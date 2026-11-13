@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { getLevels } from '../src/services/stock.service';
-import { agentFor, makeProduct, makeUser, resetDb, tableWithBom } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { getLevels } from '../src/services/stock.service.js';
+import { agentFor, makeProduct, makeUser, resetDb, tableWithBom } from './helpers.js';
 
 async function setup() {
   const user = await makeUser({ access: { MANUFACTURING: 'ADMIN' } });

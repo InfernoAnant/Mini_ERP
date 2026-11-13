@@ -13,6 +13,7 @@ export default tseslint.config(
       '**/node_modules/**',
       'venv/**',
       'server/prisma/migrations/**',
+      'server/src/generated/**',
       'test-results/**',
       'playwright-report/**',
       '.superpowers/**',

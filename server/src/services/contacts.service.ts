@@ -1,9 +1,9 @@
-import type { ContactType } from '@prisma/client';
+import type { ContactType } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertAnyModuleAccess } from '../config/permissions';
-import { AppError } from '../lib/errors';
-import { prisma } from '../lib/prisma';
-import type { AuthUser } from './auth.service';
+import { assertAnyModuleAccess } from '../config/permissions.js';
+import { AppError } from '../lib/errors.js';
+import { prisma } from '../lib/prisma.js';
+import type { AuthUser } from './auth.service.js';
 
 export const contactSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(120),

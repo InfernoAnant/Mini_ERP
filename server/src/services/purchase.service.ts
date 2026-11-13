@@ -1,17 +1,17 @@
-import { Prisma, type PurchaseStatus } from '@prisma/client';
+import { Prisma, type PurchaseStatus } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertCan, assertCanEdit } from '../config/permissions';
-import { ZERO } from '../lib/decimal';
-import { AppError, notFound } from '../lib/errors';
-import { type ListQuery, type Paged, paging } from '../lib/listQuery';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma';
-import { userRefs } from '../lib/users';
-import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service';
-import type { AuthUser } from './auth.service';
-import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service';
-import { lineInputSchema, planLineEdits, progressStatus } from './orderLines';
-import { purchaseProgress } from './progress.service';
-import { nextRef } from './reference.service';
+import { assertCan, assertCanEdit } from '../config/permissions.js';
+import { ZERO } from '../lib/decimal.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
+import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { userRefs } from '../lib/users.js';
+import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service.js';
+import type { AuthUser } from './auth.service.js';
+import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service.js';
+import { lineInputSchema, planLineEdits, progressStatus } from './orderLines.js';
+import { purchaseProgress } from './progress.service.js';
+import { nextRef } from './reference.service.js';
 
 export const purchaseInputSchema = z.object({
   vendorId: z.coerce.number().int().positive(),

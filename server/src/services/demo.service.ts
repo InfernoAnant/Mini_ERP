@@ -1,6 +1,6 @@
-import { AppError } from '../lib/errors';
-import { prisma } from '../lib/prisma';
-import { seedDemo } from '../seed/demoData';
+import { AppError } from '../lib/errors.js';
+import { prisma } from '../lib/prisma.js';
+import { seedDemo } from '../seed/demoData.js';
 
 export { seedDemo };
 

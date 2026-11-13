@@ -1,8 +1,8 @@
-import type { Module } from '@prisma/client';
+import type { Module } from '../generated/prisma/client.js';
 import type { RequestHandler } from 'express';
-import { type Action, assertCan } from '../config/permissions';
-import { AppError } from '../lib/errors';
-import { currentUser } from './auth';
+import { type Action, assertCan } from '../config/permissions.js';
+import { AppError } from '../lib/errors.js';
+import { currentUser } from './auth.js';
 
 export function requirePermission(module: Module, action: Action): RequestHandler {
   return (req, _res, next) => {

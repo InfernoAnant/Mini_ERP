@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { serialize } from '../lib/decimal';
-import { requireAuth } from '../middleware/auth';
-import { requireSystemAdmin } from '../middleware/permissions';
-import { auditQuerySchema, listAudit } from '../services/audit.service';
+import { serialize } from '../lib/decimal.js';
+import { requireAuth } from '../middleware/auth.js';
+import { requireSystemAdmin } from '../middleware/permissions.js';
+import { auditQuerySchema, listAudit } from '../services/audit.service.js';
 
 const router = Router();
 

@@ -1,16 +1,16 @@
-import { type OperationStatus, type OperationType, Prisma } from '@prisma/client';
+import { type OperationStatus, type OperationType, Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { can, canConfirmOperation, canPlaceOperation, operationModule } from '../config/permissions';
-import { dec, ZERO } from '../lib/decimal';
-import { AppError, notFound } from '../lib/errors';
-import { paging } from '../lib/listQuery';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma';
-import { userRefs } from '../lib/users';
-import { type AuditBase, logAudit, logStatus } from './audit.service';
-import type { AuthUser } from './auth.service';
-import { progressStatus } from './orderLines';
-import { nextRef } from './reference.service';
-import { postMoves } from './stock.service';
+import { can, canConfirmOperation, canPlaceOperation, operationModule } from '../config/permissions.js';
+import { dec, ZERO } from '../lib/decimal.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { paging } from '../lib/listQuery.js';
+import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { userRefs } from '../lib/users.js';
+import { type AuditBase, logAudit, logStatus } from './audit.service.js';
+import type { AuthUser } from './auth.service.js';
+import { progressStatus } from './orderLines.js';
+import { nextRef } from './reference.service.js';
+import { postMoves } from './stock.service.js';
 
 export type OrderRef = { salesOrderId?: number; purchaseOrderId?: number; manufacturingOrderId?: number };
 

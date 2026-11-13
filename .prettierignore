@@ -8,3 +8,4 @@ playwright-report
 .superpowers
 docs/problem-statement.txt
 *.prisma
+server/src/generated

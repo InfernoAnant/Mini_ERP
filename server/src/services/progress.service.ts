@@ -1,5 +1,5 @@
-import type { MoStatus, Prisma, PurchaseStatus, SalesStatus } from '@prisma/client';
-import { ZERO } from '../lib/decimal';
+import type { MoStatus, Prisma, PurchaseStatus, SalesStatus } from '../generated/prisma/client.js';
+import { ZERO } from '../lib/decimal.js';
 
 /** Game-style "level-up" progress of an order: 4 levels, 25% each, the current level partly filled. */
 export type Progress = {

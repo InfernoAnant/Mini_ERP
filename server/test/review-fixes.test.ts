@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { __resetThrottleForTests, resetDemo } from '../src/services/demo.service';
-import { agentFor, app, makeContact, makeProduct, makeUser, resetDb, tableWithBom } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { __resetThrottleForTests, resetDemo } from '../src/services/demo.service.js';
+import { agentFor, app, makeContact, makeProduct, makeUser, resetDb, tableWithBom } from './helpers.js';
 
 const signupBody = (loginId: string) => ({ loginId, email: `${loginId}@example.test`, password: 'Strong@123', name: loginId });
 

@@ -1,7 +1,7 @@
 import { type CookieOptions, type Response, Router } from 'express';
 import { z } from 'zod';
-import { currentUser, requireAuth } from '../middleware/auth';
-import * as auth from '../services/auth.service';
+import { currentUser, requireAuth } from '../middleware/auth.js';
+import * as auth from '../services/auth.service.js';
 
 const router = Router();
 

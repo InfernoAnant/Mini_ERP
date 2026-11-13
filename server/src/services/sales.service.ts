@@ -1,20 +1,20 @@
-import { Prisma, type SalesStatus } from '@prisma/client';
+import { Prisma, type SalesStatus } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { assertCan, assertCanEdit } from '../config/permissions';
-import { ZERO } from '../lib/decimal';
-import { AppError, notFound } from '../lib/errors';
-import { type ListQuery, type Paged, paging } from '../lib/listQuery';
-import { type Db, type Tx, prisma, transaction } from '../lib/prisma';
-import { userRefs } from '../lib/users';
-import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service';
-import type { AuthUser } from './auth.service';
-import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service';
-import { lineInputSchema, planLineEdits, progressStatus } from './orderLines';
-import { procureShortages } from './procurement.service';
-import { salesProgress } from './progress.service';
-import { invalidTransition } from './purchase.service';
-import { nextRef } from './reference.service';
-import { getLevels, lockProducts } from './stock.service';
+import { assertCan, assertCanEdit } from '../config/permissions.js';
+import { ZERO } from '../lib/decimal.js';
+import { AppError, notFound } from '../lib/errors.js';
+import { type ListQuery, type Paged, paging } from '../lib/listQuery.js';
+import { type Db, type Tx, prisma, transaction } from '../lib/prisma.js';
+import { userRefs } from '../lib/users.js';
+import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service.js';
+import type { AuthUser } from './auth.service.js';
+import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service.js';
+import { lineInputSchema, planLineEdits, progressStatus } from './orderLines.js';
+import { procureShortages } from './procurement.service.js';
+import { salesProgress } from './progress.service.js';
+import { invalidTransition } from './purchase.service.js';
+import { nextRef } from './reference.service.js';
+import { getLevels, lockProducts } from './stock.service.js';
 
 export const salesInputSchema = z.object({
   customerId: z.coerce.number().int().positive(),

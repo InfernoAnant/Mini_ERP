@@ -1,7 +1,7 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma/client.js';
 import { z } from 'zod';
-import { dec, ZERO } from '../lib/decimal';
-import { AppError } from '../lib/errors';
+import { dec, ZERO } from '../lib/decimal.js';
+import { AppError } from '../lib/errors.js';
 
 /** Shared line shape for sales and purchase order inputs. */
 export const lineInputSchema = z.object({

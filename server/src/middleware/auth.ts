@@ -1,6 +1,6 @@
 import type { Request, RequestHandler } from 'express';
-import { AppError } from '../lib/errors';
-import { type AuthUser, loadSessionUser, verifyToken } from '../services/auth.service';
+import { AppError } from '../lib/errors.js';
+import { type AuthUser, loadSessionUser, verifyToken } from '../services/auth.service.js';
 
 declare module 'express-serve-static-core' {
   interface Request {

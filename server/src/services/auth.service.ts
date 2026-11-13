@@ -1,9 +1,9 @@
-import { type AccessLevel, Module, type User, type UserAccess } from '@prisma/client';
+import { type AccessLevel, Module, type User, type UserAccess } from '../generated/prisma/client.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import { AppError } from '../lib/errors';
-import { prisma } from '../lib/prisma';
+import { AppError } from '../lib/errors.js';
+import { prisma } from '../lib/prisma.js';
 
 export type AuthUser = {
   id: number;

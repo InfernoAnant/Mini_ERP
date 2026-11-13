@@ -1,6 +1,6 @@
-import type { AccessLevel, Module, User } from '@prisma/client';
+import type { AccessLevel, Module, User } from '../src/generated/prisma/client.js';
 import bcrypt from 'bcryptjs';
-import { prisma } from '../src/lib/prisma';
+import { prisma } from '../src/lib/prisma.js';
 
 export const TEST_PASSWORD = 'Test@1234';
 const passwordHash = bcrypt.hashSync(TEST_PASSWORD, 4);
@@ -49,7 +49,7 @@ export async function makeUser(opts: MakeUserOpts = {}): Promise<User> {
 import request from 'supertest';
 import type { Express } from 'express';
 import http, { type Server } from 'node:http';
-import { createApp } from '../src/app';
+import { createApp } from '../src/app.js';
 
 let sharedServer: Server | null = null;
 /**
@@ -78,7 +78,7 @@ export async function agentFor(user: User): Promise<ReturnType<typeof request.ag
   return agent;
 }
 
-import type { Contact, ContactType, Product } from '@prisma/client';
+import type { Contact, ContactType, Product } from '../src/generated/prisma/client.js';
 
 let fixtureCounter = 0;
 

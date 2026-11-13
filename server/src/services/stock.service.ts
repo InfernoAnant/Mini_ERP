@@ -1,8 +1,8 @@
-import { Prisma, type StockMoveType } from '@prisma/client';
-import { AppError } from '../lib/errors';
-import { ZERO } from '../lib/decimal';
-import { type Db, type Tx } from '../lib/prisma';
-import { logAudit } from './audit.service';
+import { Prisma, type StockMoveType } from '../generated/prisma/client.js';
+import { AppError } from '../lib/errors.js';
+import { ZERO } from '../lib/decimal.js';
+import { type Db, type Tx } from '../lib/prisma.js';
+import { logAudit } from './audit.service.js';
 
 export type MoveInput = {
   productId: number;

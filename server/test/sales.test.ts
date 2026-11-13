@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { getLevels } from '../src/services/stock.service';
-import { agentFor, makeContact, makeProduct, makeUser, resetDb } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { getLevels } from '../src/services/stock.service.js';
+import { agentFor, makeContact, makeProduct, makeUser, resetDb } from './helpers.js';
 
 async function setup(level: 'ADMIN' | 'USER' = 'ADMIN') {
   const customer = await makeContact('CUSTOMER', 'Suzuki India');

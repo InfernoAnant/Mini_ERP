@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { agentFor, makeProduct, makeUser, resetDb } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { agentFor, makeProduct, makeUser, resetDb } from './helpers.js';
 
 async function setup() {
   const table = await makeProduct({ name: 'Wooden Table' });

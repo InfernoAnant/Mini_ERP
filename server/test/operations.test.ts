@@ -1,8 +1,8 @@
-import type { AccessLevel, Module } from '@prisma/client';
+import type { AccessLevel, Module } from '../src/generated/prisma/client.js';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { prisma } from '../src/lib/prisma';
-import { ledgerSumMatchesOnHand } from '../src/services/stock.service';
-import { agentFor, makeContact, makeProduct, makeUser, resetDb, tableWithBom } from './helpers';
+import { prisma } from '../src/lib/prisma.js';
+import { ledgerSumMatchesOnHand } from '../src/services/stock.service.js';
+import { agentFor, makeContact, makeProduct, makeUser, resetDb, tableWithBom } from './helpers.js';
 
 type Agent = Awaited<ReturnType<typeof agentFor>>;
 

@@ -1,9 +1,9 @@
-import type { Prisma } from '@prisma/client';
-import { decMax, ZERO } from '../lib/decimal';
-import type { Tx } from '../lib/prisma';
-import type { AuthUser } from './auth.service';
-import { createDraftMoTx, setComponentProcurer } from './manufacturing.service';
-import { createDraftPurchaseTx } from './purchase.service';
+import type { Prisma } from '../generated/prisma/client.js';
+import { decMax, ZERO } from '../lib/decimal.js';
+import type { Tx } from '../lib/prisma.js';
+import type { AuthUser } from './auth.service.js';
+import { createDraftMoTx, setComponentProcurer } from './manufacturing.service.js';
+import { createDraftPurchaseTx } from './purchase.service.js';
 
 export type Demand = { productId: number; quantity: Prisma.Decimal; freeBefore: Prisma.Decimal };
 
