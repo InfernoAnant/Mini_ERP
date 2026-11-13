@@ -18,9 +18,10 @@ ENV NODE_ENV=production
 RUN apt-get update && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
-# Production deps only (prisma CLI is a runtime dependency for `migrate deploy`); the generated
-# client is already compiled into dist/, so skip the postinstall generate.
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+# Production deps only (prisma CLI is a runtime dependency for `migrate deploy`). Install scripts must run:
+# @prisma/engines downloads the schema engine here, as root — at start the app runs as `node` and
+# could not write it into node_modules. (Our postinstall `prisma generate` also runs; harmless.)
+RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 USER node
 EXPOSE 5000
