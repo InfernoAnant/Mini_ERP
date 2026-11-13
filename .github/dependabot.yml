@@ -7,6 +7,11 @@ updates:
     groups:
       tooling:
         patterns: ['*']
+    ignore:
+      # Root TypeScript is only the parser for typescript-eslint, which supports TypeScript < 6.1.
+      # The apps (server/, client/) already compile with TypeScript 7. Remove once typescript-eslint supports TS 7.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
   - package-ecosystem: npm
     directory: /server
     schedule:
