@@ -9,6 +9,7 @@ import { userRefs } from '../lib/users';
 import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service';
 import type { AuthUser } from './auth.service';
 import { hasPendingOperation, operationsForOrder, rejectPendingForOrder } from './operations.service';
+import { moProgress } from './progress.service';
 import { invalidTransition } from './purchase.service';
 import { nextRef } from './reference.service';
 import { getLevels, lockProducts } from './stock.service';
@@ -90,6 +91,7 @@ async function toDto(db: Db, mo: MoRow) {
       status: w.status,
     })),
     operations,
+    progress: moProgress({ status: mo.status, workOrders: mo.workOrders }),
   };
 }
 export type MoDTO = Awaited<ReturnType<typeof toDto>>;

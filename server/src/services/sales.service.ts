@@ -11,6 +11,7 @@ import type { AuthUser } from './auth.service';
 import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service';
 import { lineInputSchema, planLineEdits, progressStatus } from './orderLines';
 import { procureShortages } from './procurement.service';
+import { salesProgress } from './progress.service';
 import { invalidTransition } from './purchase.service';
 import { nextRef } from './reference.service';
 import { getLevels, lockProducts } from './stock.service';
@@ -97,6 +98,11 @@ async function toDto(db: Db, so: SoRow) {
     late: isSalesLate(so),
     procurements,
     operations,
+    progress: salesProgress({
+      status: so.status,
+      lines: lines.map((l) => ({ quantity: l.quantity, deliveredQty: l.deliveredQty, available: l.available })),
+      procurementStatuses: procurements.map((p) => p.status),
+    }),
   };
 }
 export type SalesDTO = Awaited<ReturnType<typeof toDto>>;

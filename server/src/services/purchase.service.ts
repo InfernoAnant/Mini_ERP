@@ -10,6 +10,7 @@ import { type AuditBase, logAudit, logChanges, logStatus } from './audit.service
 import type { AuthUser } from './auth.service';
 import { operationsForOrder, pendingQtyByLine, rejectPendingForOrder } from './operations.service';
 import { lineInputSchema, planLineEdits, progressStatus } from './orderLines';
+import { purchaseProgress } from './progress.service';
 import { nextRef } from './reference.service';
 
 export const purchaseInputSchema = z.object({
@@ -71,6 +72,7 @@ async function toDto(db: Db, po: PoRow) {
     total: lines.reduce((sum, l) => sum.plus(l.total), ZERO),
     late: isPurchaseLate(po),
     operations,
+    progress: purchaseProgress({ status: po.status, lines: po.lines }),
   };
 }
 export type PurchaseDTO = Awaited<ReturnType<typeof toDto>>;
