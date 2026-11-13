@@ -19,7 +19,9 @@ const PROCUREMENT_DONE = ['DONE', 'FULLY_RECEIVED'];
 
 function at(stages: string[], level: 1 | 2 | 3 | 4, fraction = 1): Progress {
   const f = Math.max(0, Math.min(1, fraction));
-  const percent = Math.min(100, Math.round(25 * (level - 1) + 25 * f));
+  // Only a finished level 4 is 100%: an unfinished fill never rounds up to "complete".
+  const raw = Math.round(25 * (level - 1) + 25 * f);
+  const percent = level === 4 && f === 1 ? 100 : Math.min(99, raw);
   return { level, percent, stage: stages[level - 1] ?? '', stages, cancelled: false, complete: percent === 100 };
 }
 

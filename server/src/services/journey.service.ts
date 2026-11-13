@@ -22,6 +22,7 @@ export type JourneyNode = {
 
 const MODULE: Record<JourneyKind, Module> = { SO: 'SALES', PO: 'PURCHASE', MO: 'MANUFACTURING' };
 const MAX_DEPTH = 3;
+const GENERIC_TITLE: Record<JourneyKind, string> = { SO: 'Sales order', PO: 'Purchase order', MO: 'Manufacturing order' };
 
 async function node(user: AuthUser, kind: JourneyKind, id: number, depth: number): Promise<JourneyNode> {
   let base: Omit<JourneyNode, 'canOpen' | 'children'>;
@@ -48,7 +49,10 @@ async function node(user: AuthUser, kind: JourneyKind, id: number, depth: number
       ...(await Promise.all(mos.map((m) => node(user, 'MO', m.id, depth + 1)))),
     ];
   }
-  return { ...base, canOpen: can(user, MODULE[kind], 'view'), children };
+  const canOpen = can(user, MODULE[kind], 'view');
+  // Without access to that module, show reference/status/progress only — no vendor, product or quantities.
+  const title = canOpen ? base.title : GENERIC_TITLE[kind];
+  return { ...base, title, canOpen, children };
 }
 
 /** The order plus the POs/MOs it auto-procured (via `origin`), recursively. */

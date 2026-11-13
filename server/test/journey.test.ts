@@ -63,6 +63,9 @@ describe('order journey', () => {
     expect(res.body.canOpen).toBe(true);
     expect(res.body.children[0].canOpen).toBe(false);
     expect(res.body.children[0].children[0].canOpen).toBe(false);
+    expect(res.body.children[0].title).toBe('Manufacturing order');
+    expect(res.body.children[0].children[0].title).toBe('Purchase order');
+    expect(JSON.stringify(res.body)).not.toContain('Timber Traders');
   });
 
   it('user without SALES view → 403 on /sales/:id/journey', async () => {

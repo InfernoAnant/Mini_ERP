@@ -63,6 +63,7 @@ export function useCelebration(progress: Progress | undefined, key: string): { c
   useEffect(() => {
     if (!progress) return;
     const last = prev.current;
+    if (last && last.key !== key) setCelebrate(false); // switched to another order: never carry a burst over
     if (last && last.key === key && last.percent < 100 && progress.percent === 100 && !progress.cancelled) setCelebrate(true);
     prev.current = { key, percent: progress.percent };
   }, [progress, key]);

@@ -78,7 +78,7 @@ export function MoFormPage() {
   const [minutes, setMinutes] = useState<Record<number, string>>({});
   const action = useAction();
   const m = mo.data;
-  const party = useCelebration(m?.progress, String(id));
+  const party = useCelebration(m?.progress, `${m?.id ?? ''}`);
 
   const resetForm = (d: MoDTO) =>
     setForm({ productId: String(d.product.id), quantity: String(d.quantity), bomId: String(d.bom.id), assigneeId: d.assignee ? String(d.assignee.id) : '', deadline: dateInput(d.deadline) });

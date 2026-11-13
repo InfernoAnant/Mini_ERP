@@ -25,6 +25,9 @@ describe('progress rules', () => {
   it('sales delivered 6.5 of 10 → 91% (integer)', () => {
     expect(salesProgress({ status: 'PARTIALLY_DELIVERED', lines: [line(10, '6.5')], procurementStatuses: [] }).percent).toBe(91);
   });
+  it('sales delivered 199 of 200 → 99%, not complete', () => {
+    expect(salesProgress({ status: 'PARTIALLY_DELIVERED', lines: [line(200, 199)], procurementStatuses: [] })).toMatchObject({ percent: 99, complete: false });
+  });
   it('sales fully delivered → 100%, complete', () => {
     expect(salesProgress({ status: 'FULLY_DELIVERED', lines: [line(10, 10)], procurementStatuses: [] })).toMatchObject({ level: 4, percent: 100, complete: true });
   });

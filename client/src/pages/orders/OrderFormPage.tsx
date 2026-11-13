@@ -82,7 +82,7 @@ export default function OrderFormPage<D>({ config }: { config: OrderConfig<D> })
   const [opOpen, setOpOpen] = useState(false);
   const action = useAction();
   const v = order.data;
-  const party = useCelebration(v?.progress, String(id));
+  const party = useCelebration(v?.progress, `${v?.id ?? ''}`);
 
   const resetForm = (view: OrderView) => {
     setHeader({ partnerId: String(view.partner.id), address: view.address ?? '', personId: view.person ? String(view.person.id) : '', date: dateInput(view.date) });
